@@ -114,6 +114,8 @@ public:
     const std::vector<unsigned char>& Base58Prefix(Base58Type type) const { return base58Prefixes[type]; }
     const std::string& Bech32HRP() const { return bech32_hrp; }
     const std::string& SilentPaymentsHRP() const { return silent_payments_hrp; }
+    /** QuantBTC chain identifier (protocol versioning, state packs, snapshots) */
+    const std::string& ChainID() const { return m_chain_id; }
     const std::vector<uint8_t>& FixedSeeds() const { return vFixedSeeds; }
     const HeadersSyncParams& HeadersSync() const { return m_headers_sync_params; }
 
@@ -192,6 +194,7 @@ protected:
     std::vector<unsigned char> base58Prefixes[MAX_BASE58_TYPES];
     std::string bech32_hrp;
     std::string silent_payments_hrp;
+    std::string m_chain_id;
     ChainType m_chain_type;
     CBlock genesis;
     std::vector<uint8_t> vFixedSeeds;

@@ -33,3 +33,24 @@
 ## D-007 — Funktionale Tests: Runner-Bypass mit ASCII-Tmpdir
 - Problem: Runner-Emoji-Tmpdir + bin/Debug-Layout blockieren test_runner auf Windows (FAIL-001)
 - Gewählt: Direktaufrufe mit `--configfile/--tmpdir` + Env-Binary-Overrides; kein Upstream-Patch nötig
+
+## D-008 — Extended-Key-Versionen bleiben BIP32-kompatibel (xpub/tpub)
+- Problem: Eigene EXT-Präfixe brachen bip32_tests (BIP32-Standardvektoren nutzen xpub/xprv)
+- Alternativen: (a) eigene Präfixe + Standardvektoren ändern (verboten, §16), (b) xpub/tpub behalten
+- Gewählt: (b) — EXT-Versionen sind Serialisierungs-Labels (BIP32-Interop mit HW-Wallets/Tools), Isolation gilt für Adressen/Magics/Ports/Seeds. Restrisiko (Watch-only-Verwechslung) dokumentiert, GUI-Warnung folgt in Wallet-Phase
+- Tests: bip32_tests unverändert grün
+
+## D-009 — DecodeDestination mit Bech32-Probe + Base58-Fallback
+- Problem: Echte Kollision — neue `Q…`-P2PKH-Adressen beginnen case-insensitiv mit HRP `qb` und wurden als Bech32 fehlklassifiziert (CONSENSUS-nah: Adress-Dekodierung)
+- Gewählt: HRP-Match löst Bech32-Probe aus; nur bei gültigem Bech32-Decode gilt Bech32-Pfad, sonst Base58-Fallback. Alle bisherigen Fehlerpfade für echte Bech32-Inputs unverändert
+- Tests: key_io_valid/invalid, descriptor, bip352, quantbtc grün; voll-Suite 863/864
+
+## D-010 — Zurückgestellt (dokumentiert, nicht vergessen)
+- (a) MESSAGE_MAGIC bleibt vorerst `"Bitcoin Signed Message:\n"` — Cross-Chain-Replay-Risiko für signmessage als KNOWN LIMITATION; Migration mit neuen Vektoren in Wallet-Phase (Privkeys der Vektoren unbekannt, daher kein spontaner Wechsel)
+- (b) Signet-Default-Challenge bleibt Bitcoin's (Magic dynamisch); eigene Signet-Challenge in P2P/Testnet-Phase
+- (c) Testnet-P2SH-Präfix 196 geteilt (führendes `2` wie Bitcoin-Testnet); Mainnet isoliert (`q`)
+- (d) Regtest-AssumeUTXO-Fixtures (Höhen 110/200/299) bleiben (Test-Fixtures, kein Trust-Anker)
+
+## D-011 — Keine Datei-Edits via Shell-Redirects
+- Problem: PowerShell-`io.open(f,'w')`-Einzeiler hat 3 Framework-Dateien geleert (Auswertungsreihenfolge trunkiert vor Read) — FAIL-002, per Git wiederhergestellt, kein Datenverlust
+- Gewählt: Datei-Edits AUSSCHLIESSLICH via Edit/Write-Tools; Shell nur für read-only + Builds + git

@@ -13,7 +13,7 @@
 | regtest | `c6 1e 7b 95` | 28445 | 28443 | — | DRAFT |
 | devnet/signet | `47 94 45 e6` | 38445 | 38442 | TBD | DRAFT |
 
-chain_id DRAFT: `QBTC-1`. Adressen DRAFT: Bech32 `qb`/`tqb`/`qbrt`, Base58 P2PKH 58/Script 55 (Erstzeichen per Test zu beweisen). Datadir: `QuantBTC`/`~/.quantbtc/`.
+chain_id DRAFT: `QBTC-1`. Adressen DRAFT: Main Bech32 `qb`/Base58 P2PKH 58 (`Q`)/P2SH 120 (`q`); Testnet `tqb`/112/196; Regtest `qbrt`/`qsprt`. EXT-Key-Versionen bleiben BIP32-kompatibel (D-008). Datadir: `QuantBTC`/`~/.quantbtc/`. Silent-Payments-HRP: `qsp`/`tqsp`/`qsprt`.
 
 Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDENTITY_MAP.md`.
 

@@ -302,27 +302,27 @@ BOOST_AUTO_TEST_CASE(bip352_decode_address)
     };
     const ValidVector valid_vectors[]{
         {ChainType::MAIN,
-         "sp1qq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68gdjvfn2",
+         "qsp1qq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68gas2hdu",
          "0295fa435f2d74f73b4baaec28115df0b32e0f1b10a340ade948c56a647fe92cdc",
          "0388ce2529c809f21008959fd3b2697f6f7cf5a116acd7a93f3b1c369aab0c7a3a",
          "", 0},
         {ChainType::MAIN,
-         "sp1pq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68t02m0h0s8cwhy",
+         "qsp1pq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68t02m0h0ph5ng8",
          "0295fa435f2d74f73b4baaec28115df0b32e0f1b10a340ade948c56a647fe92cdc",
          "0388ce2529c809f21008959fd3b2697f6f7cf5a116acd7a93f3b1c369aab0c7a3a",
          "deadbeef", 1},
         {ChainType::TESTNET4,
-         "tsp1qqthpye3hdcnydp9temp7yduy6uw5h2nw8u9fz677ccrna280qwj3uq60zeqs3zfpj3age62h4ljq2lyawwdecmk8a545yysk4x3tu3skjqm2thu6",
+         "tqsp1qqthpye3hdcnydp9temp7yduy6uw5h2nw8u9fz677ccrna280qwj3uq60zeqs3zfpj3age62h4ljq2lyawwdecmk8a545yysk4x3tu3skjqvnnv7q",
          "02ee1266376e264684abcec3e23784d71d4baa6e3f0a916bdec6073ea8ef03a51e",
          "034f1641088921947a8ce957afe4057c9d739b9c6ec7ed2b421216a9a2be461690",
          "", 0},
         {ChainType::SIGNET,
-         "tsp1qqvrl2accqtatgtkllv5fdsfapq6vqnrr0uf2whhmjyas4teg7ljfqqlpec0ze90m97t3stv92p5ekzkcwzmpx0x8p7ljj9xqcjjpvnfurc00tjn9",
+         "tqsp1qqvrl2accqtatgtkllv5fdsfapq6vqnrr0uf2whhmjyas4teg7ljfqqlpec0ze90m97t3stv92p5ekzkcwzmpx0x8p7ljj9xqcjjpvnfurccknf3l",
          "0307f5771802fab42edffb2896c13d0834c04c637f12a75efb913b0aaf28f7e490",
          "03e1ce1e2c95fb2f97182d8550699b0ad870b6133cc70fbf2914c0c4a4164d3c1e",
          "", 0},
         {ChainType::REGTEST,
-         "sprt1qq04xgllnqqfdlxjkr355rmsahfn9t8l6sd0k20t4uka4c73nvvpnwqu4kvg0nm62d5jtmqp54lkc7tul0dzt25ejtn4f80505z3u0h5jag59rdg4",
+         "qsprt1qq04xgllnqqfdlxjkr355rmsahfn9t8l6sd0k20t4uka4c73nvvpnwqu4kvg0nm62d5jtmqp54lkc7tul0dzt25ejtn4f80505z3u0h5jagy36q5t",
          "03ea647ff30012df9a561c6941ee1dba66559ffa835f653d75e5bb5c7a33630337",
          "0395b310f9ef4a6d24bd8034afed8f2f9f7b44b553325cea93be8fa0a3c7de92ea",
          "", 0},
@@ -357,22 +357,22 @@ BOOST_AUTO_TEST_CASE(bip352_decode_address)
     };
     const InvalidVector invalid_vectors[]{
         {"spx1qq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68g37pn04",
-         "Invalid or unsupported prefix for Silent Payments address (expected sp, got spx)."}, // wrong HRP; never matches any chain
-        {"sp1qq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68gcwu9kg",
+         "Invalid or unsupported prefix for Silent Payments address (expected qsp, got qspx)."}, // wrong HRP; never matches any chain
+        {"qsp1qq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68ggv6mg7",
          "Silent Payments address must use Bech32m checksum", std::nullopt, /*chain_independent=*/true}, // bad checksum
-        {"sp1qqgqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2qugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68g25havg",
+        {"qsp1qqgqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2qugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68g6k3rj7",
          "Invalid Silent payments address", ChainType::MAIN}, // invalid scan pubkey
-        {"sp1qq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq57qc9nf",
+        {"qsp1qq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq5wz7mdl",
          "Invalid Silent payments address", ChainType::MAIN}, // invalid spend pubkey
-        {"sp1lq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68gaafydt",
+        {"qsp1lq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcqugecjjnjqf7ggq39vl6wexjlm00n66z94v675n7wcux6d2krr68gdl06na",
          "This implementation only supports Silent payments addresses v0 through v30 (got 31).", ChainType::MAIN}, // reserved version 31
-        {"sp1qq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdcznsxsn",
+        {"qsp1qq22l5s6l9460ww6t4tkzsy2a7zejurcmzz35pt0ffrzk5erlaykdc3k3k3d",
          "Silent payments data payload is too small (expected at least 66, got 33).", ChainType::MAIN}, // payload too small
         {"tsp1qqthpye3hdcnydp9temp7yduy6uw5h2nw8u9fz677ccrna280qwj3uq60zeqs3zfpj3age62h4ljq2lyawwdecmk8a545yysk4x3tu3skjqm2thum",
          "Silent Payments address must use Bech32m checksum", std::nullopt, /*chain_independent=*/true}, // bad checksum
         {"sp1qqgqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqf26rn7",
          "Silent Payments address must use Bech32m checksum", std::nullopt, /*chain_independent=*/true}, // bad checksum
-        {"sprt1qqgqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2qu4kvg0nm62d5jtmqp54lkc7tul0dzt25ejtn4f80505z3u0h5jagf9zkp5",
+        {"qsprt1qqgqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2qu4kvg0nm62d5jtmqp54lkc7tul0dzt25ejtn4f80505z3u0h5jage3mma2",
          "Invalid Silent payments address", ChainType::REGTEST}, // invalid scan pubkey
     };
 

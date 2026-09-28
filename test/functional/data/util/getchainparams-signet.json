@@ -13,14 +13,12 @@
     "mindiff_blocks": "no"
   },
   "net": {
-    "default_port": 38333,
+    "default_port": 38445,
     "magic": "0a03cf40",
     "dns_seeds": [
-      "seed.signet.bitcoin.sprovoost.nl.",
-      "seed.signet.achownodes.xyz."
     ]
   },
   "addresses": {
-    "bech32_hrp": "tb"
+    "bech32_hrp": "tqb"
   }
 }

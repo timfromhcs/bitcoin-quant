@@ -10,19 +10,12 @@
     "mindiff_blocks": "no"
   },
   "net": {
-    "default_port": 8333,
-    "magic": "f9beb4d9",
+    "default_port": 8444,
+    "magic": "3c596652",
     "dns_seeds": [
-      "dnsseed.bluematt.me.",
-      "seed.bitcoin.jonasschnelli.ch.",
-      "seed.btc.petertodd.net.",
-      "seed.bitcoin.sprovoost.nl.",
-      "dnsseed.emzy.de.",
-      "seed.bitcoin.wiz.biz.",
-      "seed.mainnet.achownodes.xyz."
     ]
   },
   "addresses": {
-    "bech32_hrp": "bc"
+    "bech32_hrp": "qb"
   }
 }

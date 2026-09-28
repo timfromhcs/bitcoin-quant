@@ -13,12 +13,12 @@
     "mindiff_blocks": "no"
   },
   "net": {
-    "default_port": 38333,
+    "default_port": 38445,
     "magic": "a5df2dcb",
     "dns_seeds": [
     ]
   },
   "addresses": {
-    "bech32_hrp": "tb"
+    "bech32_hrp": "tqb"
   }
 }

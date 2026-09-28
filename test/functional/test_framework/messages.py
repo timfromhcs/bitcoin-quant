@@ -89,9 +89,11 @@ TX_MIN_STANDARD_VERSION = 1
 TX_MAX_STANDARD_VERSION = 3
 
 MAGIC_BYTES = {
-    "mainnet": b"\xf9\xbe\xb4\xd9",
-    "testnet4": b"\x1c\x16\x3f\x28",
-    "regtest": b"\xfa\xbf\xb5\xda",
+    # QuantBTC NUMS magics (must match src/kernel/chainparams.cpp; signet is
+    # challenge-derived at runtime — this entry is the default-challenge value).
+    "mainnet": b"\x3c\x59\x66\x52",
+    "testnet4": b"\xb1\xad\x6e\x5f",
+    "regtest": b"\xc6\x1e\x7b\x95",
     "signet": b"\x0a\x03\xcf\x40",
 }
 

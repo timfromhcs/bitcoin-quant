@@ -91,6 +91,16 @@ CTxDestination DecodeDestination(const std::string& str, const CChainParams& par
 
     // Note this will be false if it is a valid Bech32 address for a different network
     bool is_bech32 = (ToLower(str.substr(0, params.Bech32HRP().size())) == params.Bech32HRP());
+    if (is_bech32) {
+        // A Base58 address can share the HRP prefix (QuantBTC 'Q…'/`q…`
+        // addresses vs the 'qb' HRP), so only treat the input as Bech32 when
+        // it actually Bech32-decodes; otherwise fall through to Base58.
+        const auto probe = bech32::Decode(str);
+        if (probe.encoding != bech32::Encoding::BECH32 &&
+            probe.encoding != bech32::Encoding::BECH32M) {
+            is_bech32 = false;
+        }
+    }
 
     if (!is_bech32 && DecodeBase58Check(str, data, 21)) {
         // base58-encoded Bitcoin addresses.

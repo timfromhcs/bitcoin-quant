@@ -18,6 +18,9 @@
 
 /CMakeUserPresets.json
 
+# Generated functional-test cache (regenerated via create_cache.py).
+/test/cache/
+
 # Previous releases
 /releases
 

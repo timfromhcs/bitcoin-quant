@@ -1,4 +1,11 @@
-# STATE.md — 2026-09-28 (Autonom-Loop, Session 2)
+# STATE.md — 2026-09-28 (Autonom-Loop, Session 3: Chain Identity)
+
+- Current phase: 4 Chain-Identity IMPLEMENTIERT + VERIFIZIERT (Branch feat/chain-identity, uncommittet) → Commit/Push ausstehend
+- Completed: NUMS-Identity in C++ (alle 4 Netze + RPC + Datadir + chain_id); key_io-Fallback (D-009); BIP324-Salt + Vektoren; 6 neue quantbtc-Tests; ~15 Vektor-Dateien payload-erhaltend re-verankert; Framework (Magics/Adressen/Daten) synchronisiert
+- Tests: C++ 863/864 PASS (0 Failures, 27.066.361 Assertions); funktional 10/10 PASS (echte Nodes); Python 11/11 PASS
+- Failures (alle repariert): bip32-xpub (D-008), bip324-Salt/Vektoren, Adress-Vektor-Klassen, net_peer-Portliteral, IBD-MinWork-Unterlauf, bech32/Qb-Kollision (D-009), Framework-Magics/Cache/Adressen, FAIL-002 (Prozess)
+- Open: Commit+Push feat/chain-identity; Genesis-Phase (5); Remote-CI
+- Last verified commit: `f23a57384a` (gepusht); Arbeitsbranch: feat/chain-identity
 
 - Current phase: 2 Baseline-Build TEILGRÜN (Daemon minimal PASS) → Voll-Build läuft; Python-Referenz (Genesis/PoW/Difficulty) PASS
 - Completed: B-001 GELÖST (5 Healing-Versuche); bitcoind Debug gebaut + --version OK; 11/11 Python-Tests PASS (Bitcoin-Genesis-Vektoren, Determinismus, Cross-Reject); Difficulty-Sim (ASERT-Empfehlung D-003); NUMS-Chain-Identity DRAFT (D-004); PQC-Evidenz (D-005); B-002 verifiziert (2:0)
