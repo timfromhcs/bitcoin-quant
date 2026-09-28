@@ -11,9 +11,12 @@
 #include <kernel/chainparams.h>
 #include <key.h>
 #include <key_io.h>
+#include <pow.h>
 #include <pubkey.h>
 #include <script/script.h>
 #include <util/chaintype.h>
+
+#include <set>
 
 #include <boost/test/unit_test.hpp>
 #include <test/util/setup_common.h>
@@ -101,6 +104,30 @@ BOOST_AUTO_TEST_CASE(no_bitcoin_trust_anchors)
     BOOST_CHECK(!Main().AssumeutxoForHeight(840'000).has_value());
     BOOST_CHECK_EQUAL(Main().TxData().nTime, 0);
     BOOST_CHECK_EQUAL(Main().TxData().tx_count, 0);
+}
+
+BOOST_AUTO_TEST_CASE(genesis_block)
+{
+    // Frozen QuantBTC genesis (protocol v1, see contrib/quantbtc/genesis/
+    // generated/genesis-manifest.json). Must match the independent Python
+    // generator bit-for-bit.
+    const CBlock& genesis{Main().GenesisBlock()};
+    BOOST_CHECK_EQUAL(genesis.GetHash().GetHex(),
+        "000000002f24a967129873ad204d29f947f0452710c72c9aacf45fcf2d8f2881");
+    BOOST_CHECK_EQUAL(genesis.hashMerkleRoot.GetHex(),
+        "bab4d3bab87e3ca9493b99d64f7a4db66a9b064ec7128225da032e9bdef2f9c1");
+    BOOST_CHECK_EQUAL(genesis.nTime, 1758931200);
+    BOOST_CHECK_EQUAL(genesis.nBits, 0x1d00ffffu);
+    BOOST_CHECK(CheckProofOfWork(genesis.GetHash(), genesis.nBits, Main().GetConsensus()));
+    // Cross-network rejection: the QuantBTC genesis is none of Bitcoin's.
+    static const std::set<std::string> bitcoin_geneses{
+        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+        "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
+        "00000000da84f2bafbbc53dee25a72ae507ff4914b867c565be350b0da8bf043",
+        "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6",
+        "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206",
+    };
+    BOOST_CHECK(!bitcoin_geneses.contains(genesis.GetHash().GetHex()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

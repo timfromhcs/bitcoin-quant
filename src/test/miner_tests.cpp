@@ -58,6 +58,17 @@ using node::BlockCreateOptions;
 
 namespace miner_tests {
 struct MinerTestingSetup : public TestingSetup {
+    MinerTestingSetup()
+        : TestingSetup{ChainType::REGTEST,
+                       {.extra_args = {"-testactivationheight=csv@1000000"}}}
+    {
+    }
+    // NOTE: regtest (not mainnet): block nonces below are only grind *offsets*.
+    // Pre-ground mainnet nonces cannot survive a genesis change, and grinding
+    // 110 difficulty-1 blocks is infeasible; regtest difficulty keeps this
+    // suite self-maintaining on any genesis while testing identical logic.
+    // CSV is deferred past the test chain so pre-CSV package-selection
+    // semantics hold exactly as on a fresh mainnet chain.
     void TestPackageSelection(const CScript& scriptPubKey, const std::vector<CTransactionRef>& txFirst) EXCLUSIVE_LOCKS_REQUIRED(::cs_main);
     void TestBasicMining(const CScript& scriptPubKey, const std::vector<CTransactionRef>& txFirst, int baseheight) EXCLUSIVE_LOCKS_REQUIRED(::cs_main);
     void TestPrioritisedMining(const CScript& scriptPubKey, const std::vector<CTransactionRef>& txFirst) EXCLUSIVE_LOCKS_REQUIRED(::cs_main);
@@ -878,6 +889,11 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     // We can't make transactions until we have inputs
     // Therefore, load 110 blocks :)
     static_assert(std::size(BLOCKINFO) == 110, "Should have 110 blocks to import");
+    // Anchor block times near wall-clock time: on test networks an idle tip
+    // older than 20 minutes triggers min-difficulty template rebuilds, which
+    // would break the waitNext expectations below. Times stay consensus-valid
+    // (strictly above median-time-past, below the future limit).
+    const int64_t time_anchor{(Now<NodeSeconds>() - std::chrono::seconds{111 * 600}).time_since_epoch().count()};
     int baseheight = 0;
     std::vector<CTransactionRef> txFirst;
     for (const auto& bi : BLOCKINFO) {
@@ -898,10 +914,14 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
         {
             LOCK(cs_main);
             block.nVersion = VERSIONBITS_TOP_BITS;
-            block.nTime = Assert(m_node.chainman)->ActiveChain().Tip()->GetMedianTimePast()+1;
+            block.nTime = time_anchor + (current_height + 1) * 600;
             txCoinbase.version = 1;
             txCoinbase.vin[0].scriptSig = CScript{} << (current_height + 1) << bi.extranonce;
             txCoinbase.vout.resize(1); // Ignore the (optional) segwit commitment added by CreateNewBlock (as the hardcoded nonces don't account for this)
+            // On chains with segwit active from genesis (e.g. regtest) the
+            // template coinbase also carries witness data: drop it together
+            // with the commitment, else CheckWitnessMalleation fails.
+            txCoinbase.vin[0].scriptWitness.SetNull();
             txCoinbase.vout[0].scriptPubKey = CScript();
             block.vtx[0] = MakeTransactionRef(txCoinbase);
             if (txFirst.size() == 0)
@@ -909,7 +929,11 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
             if (txFirst.size() < 4)
                 txFirst.push_back(block.vtx[0]);
             block.hashMerkleRoot = BlockMerkleRoot(block);
+            // Grind from the table offset (instant at regtest difficulty).
             block.nNonce = bi.nonce;
+            while (!CheckProofOfWork(block.GetHash(), block.nBits, Assert(m_node.chainman)->GetConsensus())) {
+                ++block.nNonce;
+            }
         }
         // Alternate calls between submitBlock and submitSolution via the
         // Mining interface.

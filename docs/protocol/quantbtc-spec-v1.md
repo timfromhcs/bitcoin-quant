@@ -17,10 +17,13 @@ chain_id DRAFT: `QBTC-1`. Adressen DRAFT: Main Bech32 `qb`/Base58 P2PKH 58 (`Q`)
 
 Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDENTITY_MAP.md`.
 
-## 3. Genesis (§30–§32)
-- Generator: `contrib/quantbtc/genesis/generate_genesis.py` (AUSSTEHEND — deterministisch, Spec+Manifest+Testvektor)
-- `genesis-manifest.json`-Felder: chain_id, protocol_version, timestamp, version, nBits, nonce, reward, tx-hash, merkle-root, genesis-hash, tool-version, source-commit
-- Freeze-Protokoll §31: doppelte unabhängige Generierung + Clean-Build + Genesis-Testsuite + Bitcoin-Genesis-Reject + externes Backup
+## 3. Genesis (§30–§32) — EINGEFROREN v1 (2026-09-28)
+- Generator: `contrib/quantbtc/genesis/generate_genesis.py` (deterministisch, NUMS-Key, Chunk-Ledger-Mining)
+- timestamp 1758931200 (roll 0), version 1, nBits 0x1d00ffff, nonce 887863234, reward 50 QBTC
+- tx/merkle: `bab4d3bab87e3ca9493b99d64f7a4db66a9b064ec7128225da032e9bdef2f9c1`
+- genesis: `000000002f24a967129873ad204d29f947f0452710c72c9aacf45fcf2d8f2881`
+- Manifest: `contrib/quantbtc/genesis/generated/genesis-manifest.json`; Evidenz: `.agent/PROOFS/genesis/`
+- Offen: Clean-Checkout-Build-Verifikation (ausstehend)
 
 ## 4. Block-Header / PoW (§36–§38)
 - Primitiv: SHA256d (`SHA256(SHA256(header))` vs. Kompakt-Target) — unverändert

@@ -163,13 +163,18 @@ public:
         m_assumed_blockchain_size = 0; // re-estimate once chain history exists
         m_assumed_chain_state_size = 0;
 
-        // TEMPORARY: Bitcoin genesis mechanics stay until the deterministic
-        // QuantBTC genesis generator lands (genesis phase). Then these asserts
-        // pin the new QuantBTC genesis hash instead.
-        genesis = CreateGenesisBlock(1231006505, 2083236893, 0x1d00ffff, 1, 50 * COIN);
+        // QuantBTC genesis block (frozen 2026-09-28, protocol v1).
+        // Deterministically generated, see contrib/quantbtc/genesis/:
+        // NUMS pubkey (no trusted ceremony), reproducible mining
+        // (timestamp 1758931200, nonce 887863234, nBits 0x1d00ffff).
+        // Full manifest: contrib/quantbtc/genesis/generated/genesis-manifest.json.
+        // The genesis output is unspendable by consensus rule.
+        const char* pszQuantBTCTimestamp = "QuantBTC genesis 2026-09-26 - independent chain, no trusted history";
+        const CScript quantbtcGenesisScript = CScript() << "021e4dcc912ccf4638b96d21db73cbf5c992482ccc6f9114140366780801ef6d00"_hex << OP_CHECKSIG;
+        genesis = CreateGenesisBlock(pszQuantBTCTimestamp, quantbtcGenesisScript, 1758931200, 887863234, 0x1d00ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256{"000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"});
-        assert(genesis.hashMerkleRoot == uint256{"4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"});
+        assert(consensus.hashGenesisBlock == uint256{"000000002f24a967129873ad204d29f947f0452710c72c9aacf45fcf2d8f2881"});
+        assert(genesis.hashMerkleRoot == uint256{"bab4d3bab87e3ca9493b99d64f7a4db66a9b064ec7128225da032e9bdef2f9c1"});
 
         // No DNS seeds yet: a new chain must not bootstrap from Bitcoin's seed network.
         // QuantBTC seed strategy (own seeds / fixed seeds) is defined in a later phase.

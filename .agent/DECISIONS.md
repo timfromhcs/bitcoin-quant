@@ -54,3 +54,9 @@
 ## D-011 — Keine Datei-Edits via Shell-Redirects
 - Problem: PowerShell-`io.open(f,'w')`-Einzeiler hat 3 Framework-Dateien geleert (Auswertungsreihenfolge trunkiert vor Read) — FAIL-002, per Git wiederhergestellt, kein Datenverlust
 - Gewählt: Datei-Edits AUSSCHLIESSLICH via Edit/Write-Tools; Shell nur für read-only + Builds + git
+
+## D-012 — Genesis: NUMS-Key + Timestamp-Roll statt schwächerer Difficulty
+- Problem: Nonce-Space bei Difficulty 1 war leer (P≈37%); Key-Zeremonie unerwünscht
+- Gewählt: (a) NUMS-Pubkey (SHA256-Grinding, Counter 0, komprimiert, für jeden verifizierbar); (b) begrenzter Timestamp-Roll (MAX_ROLL 3600 s) statt nBits-Absenkung (powLimit bleibt Difficulty 1); (c) Chunk-Ledger-Parallel-Mining (16 Worker, global-minimal, schedulings-unabhängig, resumable)
+- Gefunden via C++-Assert: Generator nutzte stale 0x41-Push für 33B-Key (Konsens: 0x21) — Serialisierungs-Konstanten immer gegen C++ kreuzprüfen
+- Tests: Doppel-Generierung identisch; C++-Assert fail-closed; bitcoind-Mainnet verifiziert
