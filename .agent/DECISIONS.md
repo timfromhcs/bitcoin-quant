@@ -25,3 +25,11 @@
 - Problem: PQ-Transaktionsautorisierung mit Standard-Rückhalt (§48)
 - Evidenz: `.agent/RESEARCH/pqc-selection.md` (FIPS 204/205 final 2024-08-13; liboqs ML-DSA ≥0.12.0, SLH-DSA-Stand prüfen)
 - Gewählt: Abstraktion zuerst (§46), ML-DSA-65 primär / SLH-DSA-SHA2-128s Backup, Freeze erst nach Build-/KAT-/Benchmark-Evidenz (§49)
+
+## D-006 — Log-Encoding: UTF-8 Pflicht
+- Problem: PowerShell-`>` schreibt UTF-16 → Git speichert Logs als binär (a8fb8a07b5 enthält 3 Binär-Logs; Inhalt intakt, aber unschön)
+- Gewählt: künftig `Out-File -Encoding utf8` / Write-Tool; keine History-Umschreibung (Evidenz bleibt lesbar via `Get-Content`)
+
+## D-007 — Funktionale Tests: Runner-Bypass mit ASCII-Tmpdir
+- Problem: Runner-Emoji-Tmpdir + bin/Debug-Layout blockieren test_runner auf Windows (FAIL-001)
+- Gewählt: Direktaufrufe mit `--configfile/--tmpdir` + Env-Binary-Overrides; kein Upstream-Patch nötig
