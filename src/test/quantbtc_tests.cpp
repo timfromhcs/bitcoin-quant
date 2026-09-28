@@ -9,6 +9,7 @@
 #include <chainparamsbase.h>
 #include <common/args.h>
 #include <kernel/chainparams.h>
+#include <arith_uint256.h>
 #include <key.h>
 #include <key_io.h>
 #include <pow.h>
@@ -128,6 +129,30 @@ BOOST_AUTO_TEST_CASE(genesis_block)
         "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206",
     };
     BOOST_CHECK(!bitcoin_geneses.contains(genesis.GetHash().GetHex()));
+}
+
+BOOST_AUTO_TEST_CASE(pow_negative)
+{
+    // §37 proof suite anchored on the frozen genesis (§114 differential anchor
+    // to contrib/quantbtc/ref/pow.py, which covers the same cases).
+    const CBlock& genesis{Main().GenesisBlock()};
+    const auto& consensus{Main().GetConsensus()};
+    // Compact decoding: 0x1d00ffff must be exactly the difficulty-1 target.
+    arith_uint256 target;
+    bool neg = false, over = false;
+    target.SetCompact(genesis.nBits, &neg, &over);
+    BOOST_CHECK(!neg && !over);
+    BOOST_CHECK_EQUAL(target.GetHex(),
+        "00000000ffff0000000000000000000000000000000000000000000000000000");
+    // Mutated nonce must fail.
+    CBlock mutated{genesis};
+    mutated.nNonce = genesis.nNonce ^ 1u;
+    BOOST_CHECK(!CheckProofOfWork(mutated.GetHash(), mutated.nBits, consensus));
+    // Harder target (256x) must fail for the frozen hash.
+    BOOST_CHECK(!CheckProofOfWork(genesis.GetHash(), 0x1c00ffffu, consensus));
+    // Overflow / negative compacts must fail closed.
+    BOOST_CHECK(!CheckProofOfWork(genesis.GetHash(), 0xff00ffffu, consensus));
+    BOOST_CHECK(!CheckProofOfWork(genesis.GetHash(), 0x1d80ffffu, consensus));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

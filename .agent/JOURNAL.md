@@ -37,3 +37,15 @@
   keine Binaries, Leak-Check sauber); Tree clean
 - Nächste Phase: Genesis-C++ (Generator-Integration, §30–§32), dann Konsens-
   Isolation (§33–§35), SHA256d-Suite (§36–§37), Difficulty (§39–§42)
+
+## Session 4 — Konsens-Isolation (§33–§37)
+- CMainParams: Script-Exceptions raus, BIP34/65/66/CSV/Segwit ab Höhe 1,
+  MinBIP9Warning 0 (Testnet4-Konvention); Headersync behalten (Null=Crash)
+- quantbtc_tests::pow_negative (Compact/Negativ/Overflow/mutierte Nonce)
+- miner_tests-Heilung (4 Stufen): Regtest-Fixture (pre-ground Mainnet-Nonces
+  ungültig nach Genesis-Wechsel) → Witness-Drop (Segwit ab 0) → CSV-Deferral
+  via -testactivationheight (BIP68-Finality) → wandnahe Blockzeiten
+  (Min-Difficulty-Idleness frisst waitNext-Erwartung)
+- Evidenz: C++ 865/866 (0 Failures, 27.029.716 Assertions), funktional 10/10
+  (getchainparams-Genesis mitgezogen); PROOFS/consensus-isolation/summary.md
+- Nächste Phasen: Difficulty-ASERT (§39–§42), PQC (§46–§55)

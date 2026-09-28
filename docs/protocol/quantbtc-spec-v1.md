@@ -33,10 +33,12 @@ Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDEN
 - Kandidaten: ASERT / LWMA / bounded EMA-Hybrid — Auswahl erst nach Simulation (§41: 1/2/5/10/100 Miner + Hashrate-Crash)
 - Target-Spacing: TBD nach Messung (Propagation, Orphan-Rate, CPU, Bandbreite, Reorg, UX, Storage-Wachstum)
 
-## 6. Konsens-Isolation (§33–§35)
-- `defaultAssumeValid`: KEIN Bitcoin-Wert übernehmen (neue Kette → leer/QuantBTC-eigen)
-- `AssumeUTXO`: erst nach echter QuantBTC-Historie + verifiziertem Snapshot-Format
-- Bitcoin-spezifische minChainWork/TxStats/Genesis/Aktivierungen: entfernen/ersetzen
+## 6. Konsens-Isolation (§33–§35) — UMGESETZT
+- `defaultAssumeValid`: leer (kein Bitcoin-Wert)
+- `AssumeUTXO`: keine Snapshots ohne echte QuantBTC-Historie
+- minChainWork leer; TxStats null; Bitcoin-Genesis ersetzt (s. §3)
+- Alle Buried-Upgrades (BIP34/65/66/CSV/Segwit) ab Höhe 1 aktiv; keine Script-Exceptions
+- Headersync-Tuning vorerst übernommen (Neukalibrierung in P2P-Phase)
 
 ## 7. PQ-Transaktionspfad (§46–§55)
 - Abstraktion: PQCAlgorithm/KeyPair/Signature/Verifier/Registry; Backend-Schichten Referenz/Produktion/Test

@@ -60,3 +60,9 @@
 - Gewählt: (a) NUMS-Pubkey (SHA256-Grinding, Counter 0, komprimiert, für jeden verifizierbar); (b) begrenzter Timestamp-Roll (MAX_ROLL 3600 s) statt nBits-Absenkung (powLimit bleibt Difficulty 1); (c) Chunk-Ledger-Parallel-Mining (16 Worker, global-minimal, schedulings-unabhängig, resumable)
 - Gefunden via C++-Assert: Generator nutzte stale 0x41-Push für 33B-Key (Konsens: 0x21) — Serialisierungs-Konstanten immer gegen C++ kreuzprüfen
 - Tests: Doppel-Generierung identisch; C++-Assert fail-closed; bitcoind-Mainnet verifiziert
+
+## D-013 — Konsens-Isolation: Fresh-Chain-Konvention + Headersync behalten
+- Problem: Bitcoin-Aktivierungshistorie (BIP34/65/66/CSV/Segwit-Höhen, Script-Exceptions, alter BIP34Hash) auf neuer Kette (§33)
+- Gewählt: Alles ab Höhe 1 aktiv + BIP34Hash null + Exceptions leer (exakte Testnet4-Konvention für frische Ketten); Headersync-Tuning BEHALTEN (Null = Crash per Assert, Neukalibrierung erst mit echten Chain-Daten in P2P-Phase)
+- miner_tests folgt: Regtest-Fixture + CSV-Deferral via -testactivationheight (pré-CSV-Semantik wie frisches Mainnet), Nonce-Grinding ab Tabellen-Offset, Witness-Drop, wandnahe Blockzeiten (Min-Difficulty-Idleness)
+- Tests: C++ 865/866 (0 Failures, 27.029.716 Assertions); funktional 10/10
