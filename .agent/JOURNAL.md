@@ -22,3 +22,18 @@
 - Push: Bearer-Auth abgelehnt (`invalid credentials`), Basic-Auth (timfromhcs + Token, transient via `http.extraHeader`) erfolgreich; Tracking `origin/feat/audit-baseline`
 - Leak-Check: keine Credentials in `.git/config` persistiert
 - Remote-CI: läuft auf GitHub (Ergebnis: NOT VERIFIED — in Folgesession prüfen)
+
+## Session 3 — Chain Identity (§25–§29, §259) auf feat/chain-identity
+- CMain/Testnet4/Testnet/Regtest/Signet: NUMS-Magics, neue Ports, leere Seeds,
+  zero Trust-Anker, neue Adresspräfixe/HRPs, `m_chain_id="QBTC-1"`, Datadir,
+  RPC-Ports, BIP324-Salt, key_io-Fallback (D-009), xpub-Entscheid (D-008)
+- Vektor-Regeneration payload-erhaltend (C++-Suites + JSONs + Framework);
+  BIP324-Vektoren via temporärem Dump re-verankert (Dump entfernt)
+- Heilungs-Loop: 179 → 16 → 0 C++-Failures; funktional 1/7 → 10/10
+  (Framework-Magics/Adressen/Cache/Daten); FAIL-002 (Shell-Wipe, per Git geheilt, D-011)
+- Evidenz: C++ 863/864 (0 Failures, 27.066.361 Assertions), funktional 10/10,
+  Python 11/11; PROOFS/chain-identity/summary.md
+- Commit 859892dded → origin/feat/chain-identity (Gates: diff-check, Secret-Grep,
+  keine Binaries, Leak-Check sauber); Tree clean
+- Nächste Phase: Genesis-C++ (Generator-Integration, §30–§32), dann Konsens-
+  Isolation (§33–§35), SHA256d-Suite (§36–§37), Difficulty (§39–§42)
