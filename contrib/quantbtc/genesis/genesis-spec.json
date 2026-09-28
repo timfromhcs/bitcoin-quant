@@ -1,0 +1,15 @@
+{
+  "_comment": "DRAFT — NOT FROZEN (§259). No value here is consensus-final until protocol design + evidence exist. Easy regtest-class nBits so the generator mines instantly; mainnet values TBD.",
+  "chain_id": "quantbtc-draft-v0",
+  "protocol_version": 1,
+  "status": "DRAFT",
+  "timestamp": 1798761600,
+  "version": 1,
+  "nbits": "0x207fffff",
+  "nonce": "TO_BE_MINED",
+  "reward_satoshis": 5000000000,
+  "timestamp_message": "QuantBTC draft genesis 2026-09-28",
+  "coinbase_bits_push": "ffff001d",
+  "coinbase_height_push": 4,
+  "genesis_pubkey_script": "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f88ac"
+}

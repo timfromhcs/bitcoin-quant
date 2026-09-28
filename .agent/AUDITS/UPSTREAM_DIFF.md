@@ -6,5 +6,5 @@
 - Remote: nur `origin https://github.com/timfromhcs/bitcoin-quant.git` — kein `upstream bitcoin/bitcoin` konfiguriert
 - Lokale Commits vs. origin/master: 0 (identisch)
 - Existierende Quant-/Quantum-Änderungen im Baum: KEINE (Negativbefund siehe ARCHITECTURE_MAP.md)
-- Exakter Upstream-Vergleich gegen bitcoin/bitcoin per fetch: NOT VERIFIED ONLINE (kein upstream-Remote, kein Netzwerkabgleich durchgeführt)
+- Exakter Upstream-Vergleich gegen bitcoin/bitcoin per fetch: VERIFIZIERT 2026-09-28 — `upstream` remote hinzugefügt, fetch OK, `merge-base HEAD upstream/master` = `05bc2f53ce`, `rev-list --left-right --count HEAD...upstream/master` = `2 0` (2 = eigene Audit-Commits auf feat/audit-baseline, 0 = hinterher). Fork = Upstream + eigene Commits.
 - Backup: `E:\btc quant\quantbtc-backup\01-git\bitcoin-quant-baseline.bundle` (290.808.112 Bytes, SHA256 `3e10b91f…5d3a`, `git bundle verify` = OK, Historie vollständig)

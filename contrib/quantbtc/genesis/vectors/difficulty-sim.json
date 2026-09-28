@@ -1,0 +1,135 @@
+{
+  "scenarios": {
+    "steady": {
+      "bitcoin": {
+        "controller": "bitcoin",
+        "final_target": 27057212876852562241809811758514136021074109120176127258143570694923,
+        "median_spacing": 598,
+        "max_spacing": 899,
+        "min_spacing": 300,
+        "n_blocks": 2500
+      },
+      "asert": {
+        "controller": "asert",
+        "final_target": 26962001473515838531446006311921366051849044378180277099640936988672,
+        "median_spacing": 599,
+        "max_spacing": 902,
+        "min_spacing": 299,
+        "n_blocks": 2500
+      },
+      "lwma": {
+        "controller": "lwma",
+        "final_target": 53081044614557738950640325283711492046209090702838481751276176396894,
+        "median_spacing": 302,
+        "max_spacing": 888,
+        "min_spacing": 138,
+        "n_blocks": 2500
+      }
+    },
+    "step_up": {
+      "bitcoin": {
+        "controller": "bitcoin",
+        "final_target": 11785905322389705910169770923371669612106982895691548399471082485543,
+        "median_spacing": 197,
+        "max_spacing": 899,
+        "min_spacing": 75,
+        "n_blocks": 2500
+      },
+      "asert": {
+        "controller": "asert",
+        "final_target": 6902093090184187993049465528954181988858217201263928827579599945728,
+        "median_spacing": 444,
+        "max_spacing": 896,
+        "min_spacing": 79,
+        "n_blocks": 2500
+      },
+      "lwma": {
+        "controller": "lwma",
+        "final_target": 13256197465993222690362971070176909614229632287501153476421990674260,
+        "median_spacing": 300,
+        "max_spacing": 888,
+        "min_spacing": 55,
+        "n_blocks": 2500
+      }
+    },
+    "crash": {
+      "bitcoin": {
+        "controller": "bitcoin",
+        "final_target": 107839786668602559178668060348078522694548577690162289924414440996864,
+        "median_spacing": 4127,
+        "max_spacing": 8999,
+        "min_spacing": 300,
+        "n_blocks": 2500
+      },
+      "asert": {
+        "controller": "asert",
+        "final_target": 267704802386958184122765434549929387891544768358683711060424572010496,
+        "median_spacing": 692,
+        "max_spacing": 7576,
+        "min_spacing": 299,
+        "n_blocks": 2500
+      },
+      "lwma": {
+        "controller": "lwma",
+        "final_target": 538522133351867368360672850488831522162398880336463382050227376198346,
+        "median_spacing": 301,
+        "max_spacing": 3779,
+        "min_spacing": 136,
+        "n_blocks": 2500
+      }
+    },
+    "lone_miner": {
+      "bitcoin": {
+        "controller": "bitcoin",
+        "final_target": 107839786668602559178668060348078522694548577690162289924414440996864,
+        "median_spacing": 26245,
+        "max_spacing": 44998,
+        "min_spacing": 3766,
+        "n_blocks": 2500
+      },
+      "asert": {
+        "controller": "asert",
+        "final_target": 1344976220425047755256487250313174513444109775574225596397571855613952,
+        "median_spacing": 702,
+        "max_spacing": 34424,
+        "min_spacing": 302,
+        "n_blocks": 2500
+      },
+      "lwma": {
+        "controller": "lwma",
+        "final_target": 2919514722902683070774158823621787788951997219635297725595497743732067,
+        "median_spacing": 282,
+        "max_spacing": 44410,
+        "min_spacing": 129,
+        "n_blocks": 2500
+      }
+    },
+    "warp": {
+      "bitcoin": {
+        "controller": "bitcoin",
+        "final_target": 42659033864786960271131001044983829697947456586924143740263715515071,
+        "median_spacing": 538,
+        "max_spacing": 899,
+        "min_spacing": 190,
+        "n_blocks": 2500
+      },
+      "asert": {
+        "controller": "asert",
+        "final_target": 30605771883625683266956658618125286419387219297078676225994346463232,
+        "median_spacing": 298,
+        "max_spacing": 896,
+        "min_spacing": 22,
+        "n_blocks": 2500
+      },
+      "lwma": {
+        "controller": "lwma",
+        "final_target": 1766847064778384329583297500742918515827483896875618958121606201292619776,
+        "median_spacing": 1,
+        "max_spacing": 888,
+        "min_spacing": 1,
+        "n_blocks": 2500
+      }
+    }
+  },
+  "note": "DRAFT simulation evidence, \u00a739-\u00a742. NOT a freeze decision."
+}

@@ -1,0 +1,15 @@
+{
+  "chain_id": "quantbtc-draft-v0",
+  "protocol_version": 1,
+  "status": "DRAFT",
+  "timestamp": 1798761600,
+  "version": 1,
+  "nbits": "0x207fffff",
+  "nonce": 0,
+  "reward_satoshis": 5000000000,
+  "timestamp_message": "QuantBTC draft genesis 2026-09-28",
+  "tx_hash": "9532047a1e8669bde134f510cee11be9a2f122dd91449889a93f3d1a21531c1b",
+  "merkle_root": "9532047a1e8669bde134f510cee11be9a2f122dd91449889a93f3d1a21531c1b",
+  "genesis_hash": "4890040fbf0cb22570518a79532a6875c60baefaee200227504796e22701de6a",
+  "generator": "contrib/quantbtc/genesis/generate_genesis.py"
+}

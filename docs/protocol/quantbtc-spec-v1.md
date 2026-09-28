@@ -5,13 +5,15 @@
 ## 1. Chain ID
 - `chain_id`: TBD (eindeutig, nicht mit Bitcoin-Netzen kollidierend)
 
-## 2. Netzwerk-Kennung
-| Netz | Magic | P2P-Port | RPC-Port | Seeds | Status |
+## 2. Netzwerk-Kennung (DRAFT-Werte, NICHT eingefroren — Evidenz: `.agent/RESEARCH/network-identity-collisions.md`)
+| Netz | Magic (NUMS) | P2P-Port | RPC-Port | Seeds | Status |
 |---|---|---|---|---|---|
-| mainnet | TBD (Kollisionsprüfung Pflicht, §26) | TBD (§27) | TBD | TBD (eigene Seeds, §25) | TBD |
-| testnet | TBD | TBD | TBD | TBD | TBD |
-| regtest | TBD | TBD | TBD | — | TBD |
-| devnet | TBD | TBD | TBD | — | TBD |
+| mainnet | `3c 59 66 52` | 8444 | 8442 | TBD (eigene Seeds) | DRAFT |
+| testnet | `c8 9d 07 20` | 28444 | 28442 | TBD | DRAFT |
+| regtest | `c6 1e 7b 95` | 28445 | 28443 | — | DRAFT |
+| devnet/signet | `47 94 45 e6` | 38445 | 38442 | TBD | DRAFT |
+
+chain_id DRAFT: `QBTC-1`. Adressen DRAFT: Bech32 `qb`/`tqb`/`qbrt`, Base58 P2PKH 58/Script 55 (Erstzeichen per Test zu beweisen). Datadir: `QuantBTC`/`~/.quantbtc/`.
 
 Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDENTITY_MAP.md`.
 
