@@ -14,3 +14,11 @@
 - `cmake -S . -B E:/btc quant/build-probe`: Compiler OK (MSVC 19.51, VS 18 BuildTools), Abbruch an `AddBoostIfNeeded.cmake:32` — Boost 1.74.0 fehlt, VCPKG_ROOT leer
 - Einordnung: ENVIRONMENT/DEPENDENCY BUG → BUILD = BLOCKED, TESTS = NOT RUN
 - Log: `.agent/BUILD_RESULTS/baseline-configure-probe.log` (+ Kopie in Backup 03-build/)
+
+## 13:50–14:00 — Commit + Push (§128–§137)
+- In-Source-CMake-Artefakte (`CMakeCache.txt`, `CMakeFiles/`) aus fehlgeschlagenen Preset-Versuchen entfernt (eigene, regenerierbar)
+- Gates: `git diff --check` OK, Secret-Grep (ghp_/Private-Key) ohne Treffer, keine Binaries unter den 20 Dateien
+- Commit `4c0d2fdb99` auf Branch `feat/audit-baseline` (master unangetastet)
+- Push: Bearer-Auth abgelehnt (`invalid credentials`), Basic-Auth (timfromhcs + Token, transient via `http.extraHeader`) erfolgreich; Tracking `origin/feat/audit-baseline`
+- Leak-Check: keine Credentials in `.git/config` persistiert
+- Remote-CI: läuft auf GitHub (Ergebnis: NOT VERIFIED — in Folgesession prüfen)
