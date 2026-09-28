@@ -1,4 +1,12 @@
-# STATE.md — 2026-09-28 (First Session, §257)
+# STATE.md — 2026-09-28 (Autonom-Loop, Session 2)
+
+- Current phase: 2 Baseline-Build TEILGRÜN (Daemon minimal PASS) → Voll-Build läuft; Python-Referenz (Genesis/PoW/Difficulty) PASS
+- Completed: B-001 GELÖST (5 Healing-Versuche); bitcoind Debug gebaut + --version OK; 11/11 Python-Tests PASS (Bitcoin-Genesis-Vektoren, Determinismus, Cross-Reject); Difficulty-Sim (ASERT-Empfehlung D-003); NUMS-Chain-Identity DRAFT (D-004); PQC-Evidenz (D-005); B-002 verifiziert (2:0)
+- Tests: C++ = NOT RUN (Voll-Build ausstehend); Python-Referenz = 11/11 PASS
+- Failures (alle repariert): Test-Reihenfolge, Sim-Pfad, fehlender Feedback-Loop, Float-Overflow, invertiertes Target-Vorzeichen, arithmetisches LWMA-Mittel
+- Open blockers: Voll-Build (Qt-Installation lang) — keine harten Blocker mehr
+- Next: Voll-Configure (Default-Features) → Voll-Build → C++-Baseline-Tests → feat/chain-identity
+- Last verified commit: `992b2ce970` (gepusht origin/feat/audit-baseline)
 
 - Current phase: Phase 0 Backup + Phase 1 Audit (ABGESCHLOSSEN für Audit-Anteil) — Baseline-Build BLOCKIERT
 - Completed: GEMINI.md gelesen (273 Abschnitte); Repo-Root/Git-State/HEAD verifiziert; externe Backup-Struktur + git bundle (verify OK, SHA256 `3e10b91f8612224772c1a2eeaf16a20b4b7ccc0f2f354b80303593fe90745d3a`); Git-Identität lokal konfiguriert (timfromhcs, KEIN Secret im Repo); `.agent/`-Struktur; 7 Audit-Dateien; Build-Konfigurations-Probe mit Befund
