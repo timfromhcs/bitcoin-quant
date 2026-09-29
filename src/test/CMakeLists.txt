@@ -82,6 +82,7 @@ add_executable(test_bitcoin
   pmt_tests.cpp
   pool_tests.cpp
   pow_tests.cpp
+  pqc_tests.cpp
   prevector_tests.cpp
   private_broadcast_tests.cpp
   psbt_tests.cpp
@@ -152,6 +153,7 @@ target_json_data_sources(test_bitcoin
   data/blockfilters.json
   data/key_io_invalid.json
   data/key_io_valid.json
+  data/mldsa65_kat.json
   data/script_tests.json
   data/sighash.json
   data/siphash.json
@@ -170,6 +172,7 @@ target_link_libraries(test_bitcoin
   bitcoin_cli
   bitcoin_node
   bitcoin_consensus
+  pqc
   minisketch
   secp256k1
   Boost::headers

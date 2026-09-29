@@ -26,6 +26,15 @@ endif()
 include(../cmake/secp256k1.cmake)
 add_secp256k1(secp256k1)
 
+# Post-quantum backend (optional production dependency).
+find_package(liboqs CONFIG QUIET)
+if(TARGET OQS::oqs)
+  message(STATUS "liboqs found: QuantBTC PQC production backend enabled")
+else()
+  message(STATUS "liboqs not found: QuantBTC PQC production backend disabled (test backend only)")
+endif()
+add_subdirectory(pqc)
+
 # Set top-level target output locations.
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)

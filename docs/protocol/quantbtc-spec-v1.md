@@ -43,11 +43,19 @@ Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDEN
 - Alle Buried-Upgrades (BIP34/65/66/CSV/Segwit) ab Höhe 1 aktiv; keine Script-Exceptions
 - Headersync-Tuning vorerst übernommen (Neukalibrierung in P2P-Phase)
 
-## 7. PQ-Transaktionspfad (§46–§55)
+## 7. PQ-Transaktionspfad (§46–§55) — FORMAT + BACKENDS STEHEN, Wallet/Aktivierung folgt
 - Abstraktion: PQCAlgorithm/KeyPair/Signature/Verifier/Registry; Backend-Schichten Referenz/Produktion/Test
-- Kandidaten: ML-DSA, SLH-DSA (Auswahl nach NIST-Spec + Build-/Lizenz-/Vektor-/Benchmark-Evidenz)
-- Format: versionierter P2PQ-Output (version, algorithm_id, key-commitment); Krypto-Agilität Pflicht
-- Testvektoren: gültig, mutierte Message/Signatur, falscher Key/Algo/Version, trunkiert/übergroß/malformiert
+- Produktions-Backend: liboqs 0.15.0, ML-DSA-65 (FIPS 204, Größen 1952/4032/3309); SLH-DSA-SHA2-128s reserviert
+- Algorithm-IDs: 0x0000 ungültig; 0x0001 ML-DSA-65; 0x0002 SLH-DSA-SHA2-128s (reserviert); 0xFFFF TEST_ONLY (niemals konsens-gültig, per Test bewiesen)
+- PQC_VERSION = 1 (1 Byte). Alle konsens-sichtbaren Blobs sind versionierte Envelopes:
+  `pubkey_blob = ver(1) || alg_id(2, LE) || raw_pubkey`
+  `sig_blob    = ver(1) || alg(2, LE) || raw_sig`
+- P2PQ scriptPubKey: `OP_1 <0x23 <ver(1) || alg(2 LE) || keyid(32)>>`,
+  mit `keyid = SHA256(raw_pubkey)` (32 Bytes, voller Hash, keine Trunkierung)
+- P2PQ-Spend: Witness `[sig_blob, pubkey_blob]`; Validierung: Versionen == Script-Version,
+  Algorithmen gleich, Größen == Algorithmus-Parameter, `SHA256(raw_pubkey) == keyid`,
+  Signatur über BIP143-Sighash gültig (Sighash-Bindung implementiert in Skript-Integration, Phase 10)
+- Benchmarks/Bibliotheks-KAT vor Backend-Freeze Pflicht (§49)
 
 ## 8. Wallet (§53–§56)
 - Generierung/Derivation/Sign/Verify/Backup/Restore/Rescan/Display/Migration; keine Secrets in Logs; Locking/Zeroisierung; First-Start-Wizard (Wallet/Node-Only/Pruned/Storage/Advanced)

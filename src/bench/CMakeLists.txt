@@ -41,6 +41,7 @@ add_executable(bench_bitcoin
   peer_eviction.cpp
   poly1305.cpp
   pool.cpp
+  pqc.cpp
   prevector.cpp
   random.cpp
   readwriteblock.cpp
@@ -68,6 +69,7 @@ target_link_libraries(bench_bitcoin
   core_interface
   test_util
   bitcoin_node
+  pqc
   Boost::headers
 )
 

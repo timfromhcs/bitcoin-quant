@@ -61,3 +61,12 @@
   funktional 11/11 inkl. mining_basic; PROOFS/difficulty-asert/summary.md
 - Bekannt: Echte Mainnet-Validierung erst mit geminten Blöcken; Fuzz-Lauf NOT RUN
 - Nächste Phasen: PQC (§46–§55), Wallet, Rest
+
+## Session 6 — PQC Abstraktion + Backends (§46–§52)
+- Quellen: FIPS 204/205 final, liboqs-API (0.15: klassisch + ctx_str), Ravencoin-RIP-25-Präzedenz (Zweitquelle)
+- `src/pqc/`: 6 Header + 5 Implementierungen; vcpkg-`pqc`-Feature; CMake-Lib + HAVE_LIBOQS
+- Heilung: Span-Alias (std::span), secure-Header-Pfad, HAVE_LIBOQS-Public, ParseHex-Typ, KAT-Fehlgriff (preHash-Gruppe statt pur)
+- Evidenz: NIST-ACVP-KAT OK + Negative; 7/7 PQC-Tests; C++ 874/875 (0 Failures,
+  27.096.742 Assertions); funktional 5/5; Benchmarks permanent (Debug-Werte protokolliert)
+- PROOFS/pqc/summary.md (inkl. Nicht-Behauptungen); D-017/D-018
+- Nächste Phasen: Wallet-PQC (§53–§56), P2PQ-Aktivierung, Rest

@@ -9,7 +9,8 @@
     "qt",
     "tests",
     "wallet",
-    "zeromq"
+    "zeromq",
+    "pqc"
   ],
   "features": {
     "qt": {
@@ -49,6 +50,12 @@
       "description": "Enable ZMQ notifications",
       "dependencies": [
         "zeromq"
+      ]
+    },
+    "pqc": {
+      "description": "Post-quantum backend (liboqs: ML-DSA, SLH-DSA)",
+      "dependencies": [
+        "liboqs"
       ]
     }
   }

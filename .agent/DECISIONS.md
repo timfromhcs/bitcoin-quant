@@ -83,3 +83,12 @@
 - Problem: Bitcoin-2016-Transitionsregel lehnt legitime ASERT-Blöcke ab (Headersync-DoS-Filter)
 - Gewählt: unter fUseASERT nur Wohlgeformtheit (≠0, kein Overflow/Negativ, ≤ powLimit); volle Regeln via CheckProofOfWork + Kontext-Validierung; Presync-Missbrauch bleibt durch Work-/Commitment-Bilanz + Redownload-PoW begrenzt (Threat-Modell!)
 - pow_tests-2016-Vektoren laufen mit explizit Nicht-ASERT-Params (NoAsert-Helper) — keine Vektor-Manipulation
+
+## D-017 — PQC-Produktions-Backend: liboqs 0.15 via vcpkg-Feature
+- Problem: Echte ML-DSA-65 ohne eigene Krypto-Implementierung (§48: kein Library-Name als Beweis, aber auch keine DIY-Krypto)
+- Gewählt: `pqc`-Feature (default-on) + `find_package(liboqs)` + `OQS::oqs`; HAVE_LIBOQS PUBLIC propagiert; Backend wirft BACKEND_MISSING ohne Lib; Größen gegen FIPS-204-Parameter gekreuzt; Version im Proof protokolliert
+- Tests: Round-Trip + Negative + NIST-ACVP-KAT (extern/pur/leer-context) + Benchmarks
+
+## D-018 — KAT-Reichweite ehrlich begrenzt
+- 1 externer NIST-ACVP-sigVer-Vektor (mehr pure/empty-context gab das File nicht her) + abgeleitete Negative + Round-Trips + Größen-Kreuzcheck
+- Kein FIPS-Konformitäts-Claim aus Tests allein; OQS warnt selbst vor Production-Use ohne Audit (RESEARCH); SLH-DSA-Backend + Wallet-Integration + Skript-Aktivierung = Folge-Phasen
