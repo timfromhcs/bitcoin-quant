@@ -49,3 +49,15 @@
 - Evidenz: C++ 865/866 (0 Failures, 27.029.716 Assertions), funktional 10/10
   (getchainparams-Genesis mitgezogen); PROOFS/consensus-isolation/summary.md
 - Nächste Phasen: Difficulty-ASERT (§39–§42), PQC (§46–§55)
+
+## Session 5 — ASERT Difficulty (§39–§42, Erstdeliverable)
+- Quellen: BCH/Nexa-Spec (aserti3-2d-Norm-Pseudocode), keine Implementierung aus Erinnerung
+- Python-Referenz `ref/asert.py` (trunc-Division, Float-Orakel, 3000 Fälle) + 20 Vektoren
+- C++: Konsens-Params, CalculateASERT (Tip-Evaluierung), GetNextWorkRequired-Ast,
+  PermittedDifficultyTransition-Ast; Anker aus Genesis (Single Source)
+- Heilung: int64-Overflow im Polynom (still! via Differential gefunden),
+  uint32-inkompatibler Vektor, Fallback-Prämisse, pow_tests-NoAsert-Helper
+- Evidenz: 20/20 Differential, C++ 867/868 (0 Failures, 26.556.192 Assertions),
+  funktional 11/11 inkl. mining_basic; PROOFS/difficulty-asert/summary.md
+- Bekannt: Echte Mainnet-Validierung erst mit geminten Blöcken; Fuzz-Lauf NOT RUN
+- Nächste Phasen: PQC (§46–§55), Wallet, Rest

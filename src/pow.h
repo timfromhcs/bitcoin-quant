@@ -29,6 +29,15 @@ std::optional<arith_uint256> DeriveTarget(unsigned int nBits, uint256 pow_limit)
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params&);
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params&);
 
+/**
+ * ASERT (aserti3-2d) difficulty adjustment: compute the nBits for the block
+ * after pindexLast, measuring time/height from the fixed consensus anchor.
+ * Integer-exact port of the normative pseudocode; differential-tested against
+ * contrib/quantbtc/ref/asert.py. See DECISIONS D-014/D-015 for the QuantBTC
+ * anchor adaptation and overflow-bound proofs.
+ */
+unsigned int CalculateASERT(const CBlockIndex* pindexLast, const Consensus::Params& params);
+
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&);
 bool CheckProofOfWorkImpl(uint256 hash, unsigned int nBits, const Consensus::Params&);

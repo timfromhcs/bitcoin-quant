@@ -14,6 +14,10 @@
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     assert(pindexLast != nullptr);
+    if (params.fUseASERT) {
+        // ASERT evaluates the tip (no retarget windows, no pblock dependency).
+        return CalculateASERT(pindexLast, params);
+    }
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
     // Only change once per difficulty adjustment interval
@@ -88,6 +92,17 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
 // or decrease beyond the permitted limits.
 bool PermittedDifficultyTransition(const Consensus::Params& params, int64_t height, uint32_t old_nbits, uint32_t new_nbits)
 {
+    if (params.fUseASERT) {
+        // ASERT permits arbitrary single-step transitions under adversarial
+        // timestamps, so only well-formedness (non-zero, within pow limit)
+        // can be enforced here. Full rules are enforced by CheckProofOfWork
+        // and contextual validation; headersync's work/commitment accounting
+        // still bounds presync abuse. See DECISIONS D-016.
+        arith_uint256 target;
+        bool neg = false, over = false;
+        target.SetCompact(new_nbits, &neg, &over);
+        return !neg && !over && target != 0 && target <= UintToArith256(params.powLimit);
+    }
     if (params.fPowAllowMinDifficultyBlocks) return true;
 
     if (height % params.DifficultyAdjustmentInterval() == 0) {
@@ -135,10 +150,61 @@ bool PermittedDifficultyTransition(const Consensus::Params& params, int64_t heig
     return true;
 }
 
+unsigned int CalculateASERT(const CBlockIndex* pindexLast, const Consensus::Params& params)
+{
+    assert(pindexLast != nullptr);
+    // Integer-exact aserti3-2d (see pow.h). All arithmetic is int64 or
+    // arith_uint256. Reachable inputs derive from uint32 timestamps and
+    // int32 heights, so scaled intermediates stay far below int64 limits
+    // (worst case ~2^57); the +-512 guards below additionally map any
+    // theoretical extreme to the correct clamp.
+    if (params.nASERTHalfLife <= 0) return UintToArith256(params.powLimit).GetCompact();
+    const arith_uint256 pow_limit = UintToArith256(params.powLimit);
+    const uint32_t max_bits = pow_limit.GetCompact();
+
+    arith_uint256 anchor_target;
+    bool neg = false, over = false;
+    anchor_target.SetCompact(params.nASERTAnchorBits, &neg, &over);
+    if (neg || over || anchor_target == 0 || anchor_target > pow_limit) {
+        anchor_target = pow_limit; // invalid anchor config: stay total, never widen
+    }
+
+    const int64_t time_delta = int64_t(pindexLast->GetBlockTime()) - params.nASERTAnchorTime;
+    const int64_t height_delta = int64_t(pindexLast->nHeight) - params.nASERTAnchorHeight;
+    // trunc((time_delta - spacing*(height_delta+1)) * 65536 / halflife),
+    // factored to avoid any intermediate overflow (see DECISIONS D-015).
+    const int64_t span = time_delta - params.nPowTargetSpacing * (height_delta + 1);
+    const int64_t exponent = span / params.nASERTHalfLife * 65536 +
+                             (span % params.nASERTHalfLife) * 65536 / params.nASERTHalfLife;
+    // floor(exponent / 65536) without relying on shift semantics:
+    const int64_t num_shifts = exponent >= 0 ? exponent >> 16 : -((-exponent + 65535) / 65536);
+    const int64_t exp_rem = exponent - num_shifts * 65536;
+    // Cubic 2^x approximation (fixed point, radix 2^16). The raw terms
+    // exceed int64 (up to ~2^64), so this is computed in arith_uint256;
+    // the result is proven < 2^18, hence exact via GetLow64.
+    const int64_t factor = int64_t(((arith_uint256(195766423245049ULL) * uint64_t(exp_rem) +
+                                     arith_uint256(971821376ULL) * uint64_t(exp_rem) * uint64_t(exp_rem) +
+                                     arith_uint256(5127ULL) * uint64_t(exp_rem) * uint64_t(exp_rem) * uint64_t(exp_rem) +
+                                     (arith_uint256(1) << 47)) >> 48).GetLow64() + 65536);
+    // Sound early-outs: anchor <= pow_limit < 2^224 and factor < 2^18, so
+    // |num_shifts| >= 512 provably lands beyond the clamps below.
+    if (num_shifts >= 512) return max_bits;
+    if (num_shifts <= -512) return arith_uint256(1).GetCompact();
+    arith_uint256 next_target = anchor_target * arith_uint256(uint64_t(factor));
+    if (num_shifts < 0) {
+        next_target >>= (unsigned int)(-num_shifts);
+    } else {
+        next_target <<= (unsigned int)num_shifts;
+    }
+    next_target >>= 16;
+    if (next_target == 0) return arith_uint256(1).GetCompact();
+    if (next_target > pow_limit) return max_bits;
+    return next_target.GetCompact();
+}
+
 // Bypasses the actual proof of work check during fuzz testing with a simplified validation checking whether
 // the most significant bit of the last byte of the hash is set.
-bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params)
-{
+bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params){
     if (EnableFuzzDeterminism()) return (hash.data()[31] & 0x80) == 0;
     return CheckProofOfWorkImpl(hash, nBits, params);
 }

@@ -29,9 +29,12 @@ Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDEN
 - Primitiv: SHA256d (`SHA256(SHA256(header))` vs. Kompakt-Target) — unverändert
 - Ehrliche Sprache: KEIN "quantum-proof"/"zero quantum advantage" für SHA256d; PQ-Sicherheit gilt Transaktions-Autorisierung (§236-Wortlaut bindend)
 
-## 5. Difficulty (§39–§42)
-- Kandidaten: ASERT / LWMA / bounded EMA-Hybrid — Auswahl erst nach Simulation (§41: 1/2/5/10/100 Miner + Hashrate-Crash)
-- Target-Spacing: TBD nach Messung (Propagation, Orphan-Rate, CPU, Bandbreite, Reorg, UX, Storage-Wachstum)
+## 5. Difficulty (§39–§42) — ASERT IMPLEMENTIERT (aserti3-2d)
+- Halbwertszeit 172800 s, Spacing 600 s; Anker = Genesis (Höhe 0, Parent-Zeit
+  == Genesis-Zeit per D-014, Bits == Genesis-nBits)
+- Integer-exakte Implementierung (`CalculateASERT`), Differential-Referenz
+  `contrib/quantbtc/ref/asert.py`, 20 Vektoren in `genesis/vectors/asert-vectors.json`
+- Testnets behalten Bitcoin-Retarget; RSP: kein Zero-Quantum-Claim (s. §4)
 
 ## 6. Konsens-Isolation (§33–§35) — UMGESETZT
 - `defaultAssumeValid`: leer (kein Bitcoin-Wert)

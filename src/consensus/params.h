@@ -123,6 +123,21 @@ struct Params {
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
+    /** Use ASERT (aserti3-2d) difficulty adjustment instead of the
+     * 2016-block retarget. See CalculateASERT in pow.cpp. */
+    bool fUseASERT{false};
+    /** ASERT halving period in seconds (172800 = 2 days). */
+    int64_t nASERTHalfLife{172800};
+    /** ASERT anchor block height (fixed reference, never retargeted). */
+    int nASERTAnchorHeight{0};
+    /** ASERT anchor parent time: evaluation timestamps are measured from here.
+     * For a chain anchored at genesis this equals the genesis time
+     * (QuantBTC adaptation: BCH forbids height-0 anchors, but a new chain
+     * has no history to anchor to; measuring from genesis itself makes a
+     * steady chain reproduce the anchor target exactly). */
+    int64_t nASERTAnchorTime{0};
+    /** ASERT anchor nBits (must decode to (0, powLimit]). */
+    uint32_t nASERTAnchorBits{0x1d00ffff};
     std::chrono::seconds PowTargetSpacing() const
     {
         return std::chrono::seconds{nPowTargetSpacing};

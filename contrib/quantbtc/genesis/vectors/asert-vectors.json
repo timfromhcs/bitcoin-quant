@@ -1,0 +1,182 @@
+[
+  {
+    "name": "steady_h0",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 0,
+    "time": 1758931800,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "steady_h1",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 1,
+    "time": 1758932400,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "steady_h2",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 2,
+    "time": 1758933000,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "steady_h100",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 100,
+    "time": 1758991800,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "steady_h2015",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 2015,
+    "time": 1760140800,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "steady_h2016",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 2016,
+    "time": 1760141400,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "steady_h100000",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 100000,
+    "time": 1818931800,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "fast_2x",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 500,
+    "time": 1759081500,
+    "expected_bits": "0x1d008c1a"
+  },
+  {
+    "name": "slow_2x",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 500,
+    "time": 1759532400,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "crash_10x",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 600,
+    "time": 1759831800,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "lone_miner",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 50,
+    "time": 1760461200,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "warp_plus_2h_x50",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 550,
+    "time": 1759621800,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "behind_1h",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 100,
+    "time": 1758988200,
+    "expected_bits": "0x1d00fc56"
+  },
+  {
+    "name": "max_ease",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 10,
+    "time": 1764121800,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "huge_height",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 5000000,
+    "time": 3758931200,
+    "expected_bits": "0x01010000"
+  },
+  {
+    "name": "huge_time",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 1000,
+    "time": 2759531800,
+    "expected_bits": "0x1d00ffff"
+  },
+  {
+    "name": "negative_delta",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 100,
+    "time": 1758926200,
+    "expected_bits": "0x1d00c4c3"
+  },
+  {
+    "name": "genesis_tip",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1d00ffff",
+    "height": 0,
+    "time": 1758931200,
+    "expected_bits": "0x1d00ff62"
+  },
+  {
+    "name": "hard_slow_2x",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1c00ffff",
+    "height": 500,
+    "time": 1759532400,
+    "expected_bits": "0x1c0356ea"
+  },
+  {
+    "name": "hard_fast_2x",
+    "anchor_height": 0,
+    "anchor_time": 1758931200,
+    "anchor_bits": "0x1c00ffff",
+    "height": 500,
+    "time": 1759081500,
+    "expected_bits": "0x1c008c1a"
+  }
+]

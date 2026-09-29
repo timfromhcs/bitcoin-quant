@@ -63,6 +63,23 @@
 
 ## D-013 — Konsens-Isolation: Fresh-Chain-Konvention + Headersync behalten
 - Problem: Bitcoin-Aktivierungshistorie (BIP34/65/66/CSV/Segwit-Höhen, Script-Exceptions, alter BIP34Hash) auf neuer Kette (§33)
-- Gewählt: Alles ab Höhe 1 aktiv + BIP34Hash null + Exceptions leer (exakte Testnet4-Konvention für frische Ketten); Headersync-Tuning BEHALTEN (Null = Crash per Assert, Neukalibrierung erst mit echten Chain-Daten in P2P-Phase)
+- Gewählt: Alles ab Höhe 1 aktiv + BIP34Hash null + Exceptions leer (exakte Testnet4-Konvention für frische Ketten); Headersync-Tuning BEHALTEN (Null crasht per Assert, Neukalibrierung erst mit echten Chain-Daten in P2P-Phase)
 - miner_tests folgt: Regtest-Fixture + CSV-Deferral via -testactivationheight (pré-CSV-Semantik wie frisches Mainnet), Nonce-Grinding ab Tabellen-Offset, Witness-Drop, wandnahe Blockzeiten (Min-Difficulty-Idleness)
 - Tests: C++ 865/866 (0 Failures, 27.029.716 Assertions); funktional 10/10
+
+## D-014 — ASERT-Anker: Genesis + virtueller Parent == Genesis-Zeit
+- Problem: BCH-Norm verbietet Anker-Höhe 0 (kein Parent); neue Kette hat keine Historie
+- Alternativen: (a) virtueller Parent T0-600 (permanenter +600s-Bias ≈ 0,24% leichter), (b) virtueller Parent == Genesis-Zeit (steady exakt)
+- Gewählt: (b) — Steady-State reproduziert Anker-Target exakt (per Vektor bewiesen); Anker-Zeit/Bits aus Genesis gelesen (Single Source, keine Konstanten-Duplikate)
+- Tests: 20 Differential-Vektoren C++==Python + Steady/Clamp/Property-Suite
+
+## D-015 — ASERT-Overflow-Bounds (bewiesen, nicht geraten)
+- Anker ≤ powLimit (< 2^224) × Faktor (< 2^18) ⇒ Produkt < 2^242 (kein Wrap)
+- num_shifts ±512 Early-Outs sind sound (jenseits davon greift garantiert ein Clamp)
+- int64-Exponenten: erreichbare Inputs (uint32-Zeiten, int32-Höhen) bleiben < 2^57; Halflife ≤ 0 fällt total auf max_bits zurück
+- Trunc-Division (C++-/Python-trunc identisch), Floor-Shift ohne Shift-Semantik-Annahme formuliert
+
+## D-016 — PermittedDifficultyTransition unter ASERT: wohlgeformt-statt-eng
+- Problem: Bitcoin-2016-Transitionsregel lehnt legitime ASERT-Blöcke ab (Headersync-DoS-Filter)
+- Gewählt: unter fUseASERT nur Wohlgeformtheit (≠0, kein Overflow/Negativ, ≤ powLimit); volle Regeln via CheckProofOfWork + Kontext-Validierung; Presync-Missbrauch bleibt durch Work-/Commitment-Bilanz + Redownload-PoW begrenzt (Threat-Modell!)
+- pow_tests-2016-Vektoren laufen mit explizit Nicht-ASERT-Params (NoAsert-Helper) — keine Vektor-Manipulation

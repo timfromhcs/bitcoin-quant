@@ -1,4 +1,7 @@
-# Difficulty-Simulations Evidenz (DRAFT, 2026-09-28)
+# Difficulty-Simulations Evidenz (DRAFT, 2026-09-28) → IMPLEMENTIERT 2026-09-29
+
+Update: ASERT implementiert (`CalculateASERT`, D-014/D-015/D-016);
+Evidenz: `.agent/PROOFS/difficulty-asert/summary.md`; Referenz: `ref/asert.py`.
 
 Tool: `contrib/quantbtc/ref/difficulty_sim.py` (Closed-Loop, LCG-seeded, deterministisch).
 Rohdaten: `contrib/quantbtc/genesis/vectors/difficulty-sim.json`.

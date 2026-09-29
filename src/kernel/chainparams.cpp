@@ -176,6 +176,15 @@ public:
         assert(consensus.hashGenesisBlock == uint256{"000000002f24a967129873ad204d29f947f0452710c72c9aacf45fcf2d8f2881"});
         assert(genesis.hashMerkleRoot == uint256{"bab4d3bab87e3ca9493b99d64f7a4db66a9b064ec7128225da032e9bdef2f9c1"});
 
+        // ASERT difficulty (aserti3-2d): anchor is genesis itself (height 0).
+        // The anchor parent time equals the genesis time (QuantBTC adaptation
+        // D-014: a steady chain then reproduces the anchor target exactly).
+        consensus.fUseASERT = true;
+        consensus.nASERTHalfLife = 172800;
+        consensus.nASERTAnchorHeight = 0;
+        consensus.nASERTAnchorTime = genesis.nTime;
+        consensus.nASERTAnchorBits = genesis.nBits;
+
         // No DNS seeds yet: a new chain must not bootstrap from Bitcoin's seed network.
         // QuantBTC seed strategy (own seeds / fixed seeds) is defined in a later phase.
         // vSeeds intentionally empty.
