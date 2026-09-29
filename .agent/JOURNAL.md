@@ -70,3 +70,12 @@
   27.096.742 Assertions); funktional 5/5; Benchmarks permanent (Debug-Werte protokolliert)
 - PROOFS/pqc/summary.md (inkl. Nicht-Behauptungen); D-017/D-018
 - Nächste Phasen: Wallet-PQC (§53–§56), P2PQ-Aktivierung, Rest
+
+## Session 7 — P2PQ-Konsens-Layer (§51-Aktivierung)
+- `CheckPQCSignature`-Virtual (fail-closed) + Generic-Override (BIP143/SIGHASH_ALL)
+  + Deferring-Forward + `VerifyWitnessProgram`-Ast (v1/35B); Link-Richtung
+  consensus → pqc (kein Zyklus)
+- E2E `p2pq_spend_e2e`: echter VerifyScript-Spend + 4 Negative
+- Evidenz: C++ 875/876 (0 Failures, 26.663.939 Assertions), funktional 13/13
+  inkl. segwit/taproot; D-019
+- Nächste Phasen: Wallet-Keystore/RPC (§53+), Policy, Rest

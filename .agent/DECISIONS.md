@@ -92,3 +92,9 @@
 ## D-018 — KAT-Reichweite ehrlich begrenzt
 - 1 externer NIST-ACVP-sigVer-Vektor (mehr pure/empty-context gab das File nicht her) + abgeleitete Negative + Round-Trips + Größen-Kreuzcheck
 - Kein FIPS-Konformitäts-Claim aus Tests allein; OQS warnt selbst vor Production-Use ohne Audit (RESEARCH); SLH-DSA-Backend + Wallet-Integration + Skript-Aktivierung = Folge-Phasen
+
+## D-019 — P2PQ-Konsens: always-active, BIP143-SIGHASH_ALL, Kapselungs-Pattern
+- Problem: v1/35B war anyone-can-spend-Fallback; P2PQ-Spends brauchen Durchsetzung + Sighash-Bindung + Amount-Zugang im Interpreter
+- Gewählt: (a) always-active ab Genesis (keine Pre-Historie → kein Transitionsrisiko; dokumentiert inkl. Testnet-Replay-Nuance); (b) BIP143-Sighash mit scriptCode == P2PQ-spk (Präzedenz wie P2WPKH-Rekonstruktion) + SIGHASH_ALL fix v1 (kein Sighash-Byte im Witness-Format); (c) CheckPQCSignature als BaseSignatureChecker-Virtual (fail-closed default, Generic-Override mit tx/nIn/amount, Deferring-Forward); (d) Link-Richtung bitcoin_consensus → pqc (pqc ohne consensus-Dep)
+- Tests: echter VerifyScript-e2e-Spend (liboqs-Signatur über echter Sighash) + Negative (mutiert/falscher Amount/leer/kurz)
+- Offen: Wallet-Keystore/RPC/GUI, Policy-Limits (Standardness), Mempool-Akzeptanz-Tests auf Regtest mit echten P2PQ-Outputs

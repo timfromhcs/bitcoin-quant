@@ -23,6 +23,14 @@
 ## Ausdrücklich NICHT behauptet
 - Keine FIPS-Konformität aus Tests allein (OQS-Audit-Warnung gilt)
 - Kein SLH-DSA-Backend (reserviert, Format-Parameter bekannt)
-- Keine Wallet-Integration, keine Skript-Interpreter-Aktivierung (Folge-Phasen);
-  TEST_XOR parst niemals konsens-gültig (per Test bewiesen)
+- Keine Wallet-Integration (Keystore/RPC/GUI = Folge-Phase); Mempool-Policy
+  für P2PQ steht aus (Konsens-Pfad bewiesen, Relay-Policy folgt)
 - Quantum-Sprache per §2/§38/§236 (SHA256d-Hinweis bleibt bestehen)
+
+## Nachtrag Skript-Layer (Phase 10a)
+- `CheckPQCSignature`-Virtual + `VerifyWitnessProgram`-Ast (v1/35B):
+  Witness [sig_blob, pubkey_blob], BIP143-SIGHASH_ALL-Bindung, fail-closed
+- E2E `p2pq_spend_e2e`: echter VerifyScript-Spend (liboqs über echter Sighash)
+  + Negative (mutiert/falscher Amount/leer/kurz)
+- C++: 875/876 PASS (0 Failures, 26.663.939 Assertions); funktional 13/13
+  inkl. segwit/taproot (Witness-Pfade intakt)

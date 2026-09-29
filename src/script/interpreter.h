@@ -285,6 +285,14 @@ public:
         return false;
     }
 
+    /** Verify a QuantBTC P2PQ witness spend. The default fails closed;
+     * transaction-aware checkers override this. sig_blob/pubkey_blob are
+     * the versioned PQC envelopes from the witness stack. */
+    virtual bool CheckPQCSignature(const std::vector<unsigned char>& sig_blob, const std::vector<unsigned char>& pubkey_blob, const CScript& scriptPubKey, ScriptError* serror = nullptr) const
+    {
+        return false;
+    }
+
     virtual bool CheckLockTime(const CScriptNum& nLockTime) const
     {
          return false;
@@ -330,6 +338,7 @@ public:
     GenericTransactionSignatureChecker(const T* txToIn, unsigned int nInIn, const CAmount& amountIn, const PrecomputedTransactionData& txdataIn, MissingDataBehavior mdb) : txTo(txToIn), m_mdb(mdb), nIn(nInIn), amount(amountIn), txdata(&txdataIn) {}
     bool CheckECDSASignature(const std::vector<unsigned char>& scriptSig, const std::vector<unsigned char>& vchPubKey, const CScript& scriptCode, SigVersion sigversion) const override;
     bool CheckSchnorrSignature(std::span<const unsigned char> sig, std::span<const unsigned char> pubkey, SigVersion sigversion, ScriptExecutionData& execdata, ScriptError* serror = nullptr) const override;
+    bool CheckPQCSignature(const std::vector<unsigned char>& sig_blob, const std::vector<unsigned char>& pubkey_blob, const CScript& scriptPubKey, ScriptError* serror = nullptr) const override;
     bool CheckLockTime(const CScriptNum& nLockTime) const override;
     bool CheckSequence(const CScriptNum& nSequence) const override;
 };
@@ -353,6 +362,11 @@ public:
     bool CheckSchnorrSignature(std::span<const unsigned char> sig, std::span<const unsigned char> pubkey, SigVersion sigversion, ScriptExecutionData& execdata, ScriptError* serror = nullptr) const override
     {
         return m_checker.CheckSchnorrSignature(sig, pubkey, sigversion, execdata, serror);
+    }
+
+    bool CheckPQCSignature(const std::vector<unsigned char>& sig_blob, const std::vector<unsigned char>& pubkey_blob, const CScript& scriptPubKey, ScriptError* serror = nullptr) const override
+    {
+        return m_checker.CheckPQCSignature(sig_blob, pubkey_blob, scriptPubKey, serror);
     }
 
     bool CheckLockTime(const CScriptNum& nLockTime) const override

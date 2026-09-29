@@ -14,6 +14,9 @@
 #include <pqc/key.h>
 
 #include <crypto/sha256.h>
+#include <primitives/transaction.h>
+#include <script/interpreter.h>
+#include <script/script.h>
 #include <test/data/mldsa65_kat.json.h>
 #include <test/util/json.h>
 #include <test/util/setup_common.h>
@@ -172,6 +175,70 @@ BOOST_AUTO_TEST_CASE(test_backend_vectors)
     info.keyid = kid;
     BOOST_CHECK(VerifyP2PQCommitment(info, tk.pubkey) == PQCError::OK);
 }
+
+#ifdef HAVE_LIBOQS
+BOOST_AUTO_TEST_CASE(p2pq_spend_e2e)
+{
+    // Full consensus-path spend: P2PQ prevout -> witness [sig,puk] verified
+    // through VerifyScript (BIP143 SIGHASH_ALL binding). No mocks: real
+    // liboqs signatures over a real transaction sighash.
+    RegisterDefaultPQCBackends();
+    auto be{GetPQCBackend("liboqs")};
+    BOOST_REQUIRE(be);
+    auto kp{be->Generate(PQCAlgorithm::ML_DSA_65)};
+    BOOST_REQUIRE(kp.has_value());
+    uint256 keyid;
+    CSHA256().Write(kp->pubkey.data(), kp->pubkey.size()).Finalize(keyid.begin());
+    const CScript spk{BuildP2PQScript(PQCAlgorithm::ML_DSA_65, keyid)};
+    constexpr CAmount kPrevAmount{100};
+    CMutableTransaction mtx;
+    mtx.vin.resize(1);
+    mtx.vin[0].prevout = COutPoint(Txid(), 0);
+    mtx.vout.resize(1);
+    mtx.vout[0].nValue = 90;
+    mtx.vout[0].scriptPubKey = CScript() << OP_TRUE;
+    const CTransaction tx(mtx);
+    const uint256 sighash{SignatureHash(spk, tx, 0, SIGHASH_ALL, kPrevAmount, SigVersion::WITNESS_V0)};
+    auto sig{be->Sign(*kp, {sighash.begin(), sighash.end()})};
+    BOOST_REQUIRE(sig.has_value());
+    auto sig_blob{EncodeSigBlob(PQCAlgorithm::ML_DSA_65, sig->bytes)};
+    auto key_blob{EncodePubKeyBlob(PQCAlgorithm::ML_DSA_65, kp->pubkey)};
+    BOOST_REQUIRE(sig_blob.has_value() && key_blob.has_value());
+    CScriptWitness witness;
+    witness.stack = {*sig_blob, *key_blob};
+    TransactionSignatureChecker checker(&tx, 0, kPrevAmount, MissingDataBehavior::ASSERT_FAIL);
+    ScriptError err{SCRIPT_ERR_OK};
+    BOOST_CHECK_MESSAGE(VerifyScript(CScript(), spk, &witness,
+                                     SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS,
+                                     checker, &err),
+                        ScriptErrorString(err));
+    // Mutated signature must fail consensus validation.
+    auto mut_sig{*sig};
+    mut_sig.bytes[7] ^= 0x01;
+    auto mut_sig_blob{EncodeSigBlob(PQCAlgorithm::ML_DSA_65, mut_sig.bytes)};
+    BOOST_REQUIRE(mut_sig_blob.has_value());
+    CScriptWitness bad_witness;
+    bad_witness.stack = {*mut_sig_blob, *key_blob};
+    BOOST_CHECK(!VerifyScript(CScript(), spk, &bad_witness,
+                              SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS,
+                              checker, &err));
+    // Wrong amount changes the sighash: must fail.
+    TransactionSignatureChecker bad_amount_checker(&tx, 0, kPrevAmount + 1, MissingDataBehavior::ASSERT_FAIL);
+    BOOST_CHECK(!VerifyScript(CScript(), spk, &witness,
+                              SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS,
+                              bad_amount_checker, &err));
+    // Empty / malformed witness must fail closed.
+    CScriptWitness empty_witness;
+    BOOST_CHECK(!VerifyScript(CScript(), spk, &empty_witness,
+                              SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS,
+                              checker, &err));
+    CScriptWitness short_witness;
+    short_witness.stack = {*sig_blob};
+    BOOST_CHECK(!VerifyScript(CScript(), spk, &short_witness,
+                              SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS,
+                              checker, &err));
+}
+#endif
 
 #ifdef HAVE_LIBOQS
 BOOST_AUTO_TEST_CASE(oqs_backend_mldsa65_kat)

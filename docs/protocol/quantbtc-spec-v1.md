@@ -54,7 +54,8 @@ Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDEN
   mit `keyid = SHA256(raw_pubkey)` (32 Bytes, voller Hash, keine Trunkierung)
 - P2PQ-Spend: Witness `[sig_blob, pubkey_blob]`; Validierung: Versionen == Script-Version,
   Algorithmen gleich, Größen == Algorithmus-Parameter, `SHA256(raw_pubkey) == keyid`,
-  Signatur über BIP143-Sighash gültig (Sighash-Bindung implementiert in Skript-Integration, Phase 10)
+  Signatur über BIP143-Sighash (SIGHASH_ALL fix v1) gültig; Konsens-Ast im Interpreter
+  aktiv ab Genesis (D-019); Wallet-Integration (Keystore/RPC) folgt
 - Benchmarks/Bibliotheks-KAT vor Backend-Freeze Pflicht (§49)
 
 ## 8. Wallet (§53–§56)

@@ -10,6 +10,8 @@
 #include <crypto/sha256.h>
 #include <prevector.h>
 #include <pubkey.h>
+#include <pqc/backend.h>
+#include <pqc/encoding.h>
 #include <script/script.h>
 #include <serialize.h>
 #include <span.h>
@@ -1752,6 +1754,30 @@ bool GenericTransactionSignatureChecker<T>::CheckSchnorrSignature(std::span<cons
 }
 
 template <class T>
+bool GenericTransactionSignatureChecker<T>::CheckPQCSignature(const std::vector<unsigned char>& sig_blob, const std::vector<unsigned char>& pubkey_blob, const CScript& scriptPubKey, ScriptError* serror) const
+{
+    // QuantBTC P2PQ (always active from genesis; no pre-history can contain
+    // spends). Witness layout: [sig_blob, pubkey_blob] with versioned
+    // envelopes; the signature commits via BIP143 sighash (SIGHASH_ALL).
+    const auto decoded_sig{pqc::DecodeSigBlob({sig_blob.data(), sig_blob.size()})};
+    if (!decoded_sig) return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH);
+    const auto decoded_key{pqc::DecodePubKeyBlob({pubkey_blob.data(), pubkey_blob.size()})};
+    if (!decoded_key) return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH);
+    if (decoded_sig.value().first != decoded_key.value().first) return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH);
+    if (amount < 0) return HandleMissingData(m_mdb);
+    const uint256 sighash{SignatureHash(scriptPubKey, *txTo, nIn, SIGHASH_ALL, amount, SigVersion::WITNESS_V0, this->txdata, &m_sighash_cache)};
+    auto backend{pqc::GetPQCBackend("liboqs")};
+    if (!backend || !backend->Supports(decoded_sig.value().first)) {
+        return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH);
+    }
+    const pqc::PQCSignature sig{decoded_sig.value().first, decoded_sig.value().second};
+    if (backend->Verify(decoded_key.value().second, {sighash.begin(), sighash.end()}, sig) != pqc::PQCError::OK) {
+        return set_error(serror, SCRIPT_ERR_EVAL_FALSE);
+    }
+    return set_success(serror);
+}
+
+template <class T>
 bool GenericTransactionSignatureChecker<T>::CheckLockTime(const CScriptNum& nLockTime) const
 {
     // There are two kinds of nLockTime: lock-by-blockheight
@@ -1997,6 +2023,19 @@ static bool VerifyWitnessProgram(const CScriptWitness& witness, int witversion, 
             }
             return set_success(serror);
         }
+    } else if (witversion == 1 && program.size() == 35 && !is_p2sh) {
+        // QuantBTC P2PQ: 35-byte witness v1 program (version || alg_id || keyid).
+        // Active from genesis (no pre-history can contain spends). Witness
+        // layout is exactly [sig_blob, pubkey_blob]; the signature commits
+        // via BIP143 sighash (SIGHASH_ALL, see CheckPQCSignature).
+        if (stack.size() != 2) {
+            return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH);
+        }
+        // Rebuild the scriptPubKey for sighash scriptCode (OP_1 <35-byte program>).
+        CScript p2pq_spk;
+        p2pq_spk << OP_1;
+        p2pq_spk << std::vector<unsigned char>(program.begin(), program.end());
+        return checker.CheckPQCSignature(stack.front(), stack.back(), p2pq_spk, serror);
     } else if (!is_p2sh && CScript::IsPayToAnchor(witversion, program)) {
         return true;
     } else {

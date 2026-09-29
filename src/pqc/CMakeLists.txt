@@ -16,10 +16,13 @@ if(TARGET OQS::oqs)
   list(APPEND PQC_SOURCES backend_oqs.cpp)
 endif()
 add_library(pqc STATIC EXCLUDE_FROM_ALL ${PQC_SOURCES})
+# NOTE: pqc must stay linkable without bitcoin_consensus (the consensus
+# library calls into pqc for P2PQ validation, so the edge goes
+# bitcoin_consensus -> pqc, never the reverse).
 target_link_libraries(pqc
   PRIVATE
     core_interface
-    bitcoin_consensus
+    bitcoin_crypto
     bitcoin_util
 )
 if(TARGET OQS::oqs)
