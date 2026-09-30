@@ -23,3 +23,5 @@
 - Symptom: exakter Diff gegen bitcoin/bitcoin nicht per fetch belegbar
 - Nächster Schritt: `git remote add upstream https://github.com/bitcoin/bitcoin.git` + fetch + `git merge-base`/Diff-Dokumentation (nur lesend)
 - Blockiert: §20-Vergleich (als NOT VERIFIED ONLINE markiert, kein Release-Gate)
+
+Update 2026-09-30: Re-Trigger nach Push 7293662e69 (60s gewartet) — weiterhin total_count=0. B-003 bleibt BLOCKED-external.
