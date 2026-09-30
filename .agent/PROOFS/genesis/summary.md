@@ -12,7 +12,9 @@
 ## §31 checklist
 1. Generate twice independently: PASS — run1/run2 manifests IDENTICAL
    (excl. source_commit metadata); logs in backup 05-genesis/
-2. Build from clean checkout: PENDING (queued; incremental build verified)
+2. Build from clean checkout: PASS 2026-09-30 — worktree of pushed
+   9e3240c764 + full configure + full build (bitcoind/test_bitcoin/qt) +
+   full suite 877/878, 0 failures, 27.040.867 assertions (log: backup 09-tests/)
 3. Genesis test suite: PASS — quantbtc_tests::genesis_block (C++) + 12/12 Python
 4. Bitcoin genesis rejected: PASS — C++ cross-network set + Python vectors
 5. External backup: PASS — E:/btc quant/quantbtc-backup/05-genesis/ (manifest,

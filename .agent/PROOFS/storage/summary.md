@@ -1,0 +1,26 @@
+# PROOFS — Storage proof core (§78–§81, Phase 11 Kern)
+
+## Was bewiesen ist
+- **Differential Python→C++ (§114):** 3 Vektoren (1 B / 192 KiB+17 / 100 KiB),
+  Root + 16 Challenge-Indizes + Proof + Envelope **byte-identisch**
+  (`src/test/storage_test_vectors.h`, generiert via
+  `contrib/quantbtc/gen_storage_vectors.py`)
+- **Single-source (§157):** `storage::MerkleRoot == consensus ComputeMerkleRoot`
+  auf gleichen Leaves (kein Merkle-Fork)
+- **Negatives:** chunk-tamper / path-tamper / falsche Root → ROOT_MISMATCH,
+  leerer Chunk → BAD_CHUNK_SIZE, gekürzter Pfad → PATH_LENGTH_MISMATCH/ROOT_MISMATCH
+- **Envelope (§207):** versioniert (v1), strikt — Trail-Byte/Trunkierung/
+  Versions-Bump/leer werden abgewiesen; Encode deterministisch
+- **Suite:** `storage_tests` 4/4, 111/111 Assertions
+  (`quantbtc-backup/09-tests/storage-tests.log`); Gesamtsuite jetzt **882**
+
+## Detection-Kurve (k=16, Spot-Check-Ehrlichkeit)
+- Provider löscht p-Anteil: P(Entdeckung) = 1-(1-p)^16
+- p=1% → 0.1485 | p=5% → 0.5599 | p=10% → 0.8147 | p=50% → ~1.0000
+- Ehrlich dokumentiert: beweist Abrufbarkeit der Samples, kein PoRep
+  (Replikations-Nachweis), keine Voll-Replikations-Garantie
+
+## Offene Stufen (NICHT in diesem Commit)
+- Provider-Registry, Reward-Formel (fixpunkt), Failure/Exit/Sybil → Phase 14
+- Konsens-Hook (consensus→storage), P2P-Challenge-Gossip → Phase 16/14
+- RPC (`storageprove`, `storageverify`) → Phase 15

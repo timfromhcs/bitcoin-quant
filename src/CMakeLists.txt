@@ -34,6 +34,7 @@ else()
   message(STATUS "liboqs not found: QuantBTC PQC production backend disabled (test backend only)")
 endif()
 add_subdirectory(pqc)
+add_subdirectory(storage)
 
 # Set top-level target output locations.
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)

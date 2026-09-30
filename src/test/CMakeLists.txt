@@ -110,6 +110,7 @@ add_executable(test_bitcoin
   skiplist_tests.cpp
   sock_tests.cpp
   span_tests.cpp
+  storage_tests.cpp
   streams_tests.cpp
   sync_tests.cpp
   system_ram_tests.cpp
@@ -173,6 +174,7 @@ target_link_libraries(test_bitcoin
   bitcoin_node
   bitcoin_consensus
   pqc
+  storage
   minisketch
   secp256k1
   Boost::headers

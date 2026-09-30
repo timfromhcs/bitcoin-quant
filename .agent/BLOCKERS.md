@@ -1,4 +1,17 @@
-# BLOCKERS.md — 2026-09-28
+# BLOCKERS.md — 2026-09-28 (Session 10: CI-Diagnose)
+
+## B-003 — GitHub Actions: 0 Workflows registriert (BLOCKED-EXTERNAL)
+- Symptom: `actions/workflows` → total 0; `actions/runs` → total 0; check-runs
+  auf gepushten Commits → 0. Obwohl: `.github/workflows/ci.yml` existiert
+  (Inhalt-API OK), push-Trigger `branches: ['**']`, Actions enabled=true,
+  allowed=all, Repo public Fork.
+- Diagnose (4 Endpunkte konsistent): GitHub hat KEINE Workflows registriert.
+  Ursache serverseitig (Owner-Settings/Re-Verifizierung nötig), nicht im Code.
+- Aktion: Repo-Owner prüft Settings → Actions (ggf. aus/an); nächster Push
+  re-testet die Trigger-Hypothese automatisch. KEIN endloses Polling (§253).
+- Kompensation: lokale Voll-Verifikation (Suite + Smoke + Clean-Build) bleibt
+  die maßgebliche Gate-Evidenz bis CI läuft.
+
 
 ## B-001 — vcpkg/Boost-Provisionierung (GELÖST 2026-09-28, ENVIRONMENT/DEPENDENCY)
 - Symptom: `cmake`-Configure brach ab (erst Boost missing, dann vcpkg-Baseline-Commit fehlend, dann Tool-Version zu alt, dann Qt-Scope zu groß)

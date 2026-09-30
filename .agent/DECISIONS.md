@@ -109,3 +109,8 @@
 - Gewählt: (a) `p2pq(pub[,priv])`-Custody-Form (Längen-validiert, ToString leckt nie Privates, ExpandPrivate füllt pqc_keys); (b) FlatSigningProvider.pqc_keys + GetPQCKey/GetPQCPubKeys-Virtuals; (c) BaseSignatureCreator::CreatePQCSig-Virtual (Mutable echt mit BIP143/Amount, Dummy größenkorrekt für Fee-Schätzung); (d) SignStep/ProduceSignature-P2PQ-Ast; (e) `signpqcwithkey` + `createpqcaddress` RPCs (Offline-Signer-Muster wie signrawtransactionwithkey, fail-closed: Amount Pflicht, nur P2PQ-Inputs)
 - Policy: mempool akzeptiert wohlgeformte P2PQ-Inputs (bounded Verifikation, keine unknown-script-DoS-Fläche); Standardness-Tuning folgt in Ökonomie-Phase
 - Tests: C++ ProduceSignature→VerifyScript-Loop + RPC-e2e fund→sign→send→mine→confirm + 2 Negative (falscher Key, fehlender Amount)
+
+## D-022 � Storage-Proof: PDP-lite Spot-Checks (kein PoRep), crypto-only DAG
+- Problem: Speicher-Nachweis ohne Trusted Setup / SNARKs, deterministisch verifizierbar
+- Gew�hlt: (a) 64KiB-Chunks, SHA256d-Leaves, Bitcoin-Duplicate-Odd-Merkle; (b) Challenge k=16 aus SHA256d(root||provider||BE64(epoch)); (c) Proof-Envelope v1 strikt/versioniert; (d) src/storage/ linkt NUR bitcoin_crypto (kein consensus � Hook sp�ter inward: consensus?storage, gleiche Regel wie pqc); (e) Merkle-�quivalenz zu consensus per Test bewiesen statt Code-Duplikation zu riskieren
+- Ehrlichkeit: Spot-Checks beweisen Sample-Abrufbarkeit (Kurve in PROOFS/storage), KEIN Replikations-Nachweis, KEINE Voll-Replikations-Garantie; Registry/Rewards/Failure/Exit = Phase 14

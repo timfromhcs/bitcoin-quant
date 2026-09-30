@@ -72,8 +72,21 @@ Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDEN
 ## 11. NFT (§70–§77, §86)
 - Trennung Ownership/Metadaten/Content-Commitment/Storage-Vertrag vs. Content-Bytes; Kern-Record (asset_id … status); Lifecycle MINTED→…→BURNED; bounded Budgets/Renewals; Grace statt Sofort-Löschung; ehrliche Lösch-Sprache (expired/unpinned/…)
 
-## 12. Storage (§78–§85)
-- Provider-Registrierung, Challenge→Proof→Verify→Reward (deterministisch), Challenge-Entropie nicht provider-kontrolliert, Sybil-Maßnahmen, Failure-/Exit-Pfade, Trennung Pruning vs. Content-Storage
+## 12. Storage (§78–§85) — PROOF-KERN DRAFT v1 (PDP-lite, ehrlich begrenzt)
+- Content: 65536-Byte-Chunks (letzter kürzer); Leaf(i) = SHA256d(chunk);
+  Binär-Merkle (Bitcoin-Duplicate-Odd-Semantik); content_root (32B) im NFT-Record
+- Challenge (Epoche e, Provider P, Tip T): `seed = SHA256d(T.hash || P.id || BE64(e))`,
+  `idx_i = int(SHA256d(seed || BE32(i))) mod n_chunks`, i in 0..k-1 (k=16);
+  Entropie aus der Kette — Provider kann nicht grinden (§80)
+- Proof: pro Sample (chunk_bytes, Merkle-Pfad); Verifikation: Leaf-Hash falten,
+  Root vergleichen — alle k müssen stimmen (deterministisch, kein Setup, kein SNRK)
+- Proof-Envelope v1: `ver(1) || idx(4 LE) || pathlen(4 LE) || siblings || chunklen(4 LE) || chunk`
+- Ehrlichkeit: Spot-Checks beweisen abrufbare Speicherung der Samples, KEINE
+  permanente Voll-Replikation und KEIN PoRep mit Replikations-Nachweis;
+  Replikation/Redundanz = Policy-Layer (Phase 14)
+- Reward-Skizze (§81, Formel erst Phase 14): pro verifizierter Epoche
+  `reward = base_rate * verified_bytes` (fixpunkt, deterministisch, Overflow-regeln TBD)
+- Provider-Registrierung/Failure/Exit/Sybil: Policy-Layer Phase 14 (Kern hier: Challenge/Proof/Verify)
 
 ## 13. Storage-Economy (§87–§88)
 - Formel + Rundung + Overflow + Maxima + Transitionstests; Geldpolitik (Supply/Reward/Halving/Fees/Burn) vor Mainnet einfrieren

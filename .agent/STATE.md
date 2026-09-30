@@ -1,3 +1,11 @@
+# STATE.md — 2026-09-30 (Autonom-Loop, Session 5: Wallet-PQC + Storage-Kern)
+
+- Current phase: 10c Wallet-PQC-Custody FERTIG (gepusht 9e3240c764) + 11 Storage-Proof-KERN implementiert (uncommittet); Freeze §31.2 NACHGEHOLT (Clean-Checkout-Build GRÜN)
+- Completed: P2PQ-Custody/RPC-e2e; src/storage/ (Merkle/Challenge/Verify/Envelope, crypto-only); Python-Ref + 3 Differential-Vektoren; storage_tests 4/4; Clean-Worktree-Build (bitcoind/test/qt) + Suite 877/878 aus Clean-Tree; B-003 dokumentiert (CI 0 Runs, extern)
+- Tests: C++ 882 (878 + 4 storage, 0 Failures); funktional PQC-e2e PASS; Python storage-ref PASS
+- Open: Commit+Push Storage-Kern; Phase 14 (Registry/Rewards), 15 (RPC), 16 (P2P), 12/13 (StatePacks/NFT)
+- Last verified commit: `9e3240c764` (gepusht origin/feat/chain-identity); Arbeitsbranch: feat/chain-identity
+
 # STATE.md — 2026-09-28 (Autonom-Loop, Session 3: Chain Identity)
 
 - Current phase: 4 Chain-Identity IMPLEMENTIERT + VERIFIZIERT (Branch feat/chain-identity, uncommittet) → Commit/Push ausstehend
