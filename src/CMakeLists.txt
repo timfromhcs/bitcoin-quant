@@ -282,6 +282,7 @@ add_library(bitcoin_node STATIC EXCLUDE_FROM_ALL
   rpc/server.cpp
   rpc/server_util.cpp
   rpc/signmessage.cpp
+  rpc/storage.cpp
   rpc/txoutproof.cpp
   script/sigcache.cpp
   signet.cpp
@@ -302,6 +303,7 @@ target_link_libraries(bitcoin_node
     bitcoin_common
     bitcoin_util
     pqc
+    storage
     $<TARGET_NAME_IF_EXISTS:bitcoin_zmq>
     leveldb
     minisketch

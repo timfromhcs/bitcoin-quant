@@ -114,3 +114,6 @@
 - Problem: Speicher-Nachweis ohne Trusted Setup / SNARKs, deterministisch verifizierbar
 - Gewählt: (a) 64KiB-Chunks, SHA256d-Leaves, Bitcoin-Duplicate-Odd-Merkle; (b) Challenge k=16 aus SHA256d(root||provider||BE64(epoch)); (c) Proof-Envelope v1 strikt/versioniert; (d) src/storage/ linkt NUR bitcoin_crypto (kein consensus — Hook später inward: consensus?storage, gleiche Regel wie pqc); (e) Merkle-Äquivalenz zu consensus per Test bewiesen statt Code-Duplikation zu riskieren
 - Ehrlichkeit: Spot-Checks beweisen Sample-Abrufbarkeit (Kurve in PROOFS/storage), KEIN Replikations-Nachweis, KEINE Voll-Replikations-Garantie; Registry/Rewards/Failure/Exit = Phase 14
+
+## D-023 — Storage-RPC: eigene Kategorie + Raw-Order-Konvention
+- Gewählt: (a) eigene RPC-Kategorie storage mit RegisterStorageRPCCommands (statt rawtransactions-Anhang — eigene Domäne, eigene Bounds); (b) Hashes als RAW-Byte-Order-Hex (bewusste Abweichung von der display-reversed RPC-Norm, begründet + in Help dokumentiert); (c) storageverify fail-closed (valid=false+reason, wirft nie für Proof-Inhalt); (d) Bounds Content 1MiB / Samples 1024 / Pfad 64; (e) test/config.ini nur lokal (CMake-Build, Binary-Overrides via Env), NICHT committen

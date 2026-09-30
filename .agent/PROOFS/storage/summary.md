@@ -24,3 +24,8 @@
 - Provider-Registry, Reward-Formel (fixpunkt), Failure/Exit/Sybil â†’ Phase 14
 - Konsens-Hook (consensusâ†’storage), P2P-Challenge-Gossip â†’ Phase 16/14
 - RPC (`storageprove`, `storageverify`) â†’ Phase 15
+
+## RPC-Evidenz (2026-09-30)
+- test/functional/rpc_storage.py PASS auf echter Node (unabhängige hashlib-Re-Implementierung als Orakel)
+- commit/challenge/prove/verify über 5 Content-Größen (1 B..192 KiB) + Epochen 0/7, alle Negative fail-closed, alle Validierungsfehler -8
+- Log: quantbtc-backup/09-tests/rpc-storage-func.log

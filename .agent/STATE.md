@@ -1,3 +1,11 @@
+# STATE.md — 2026-09-30 (Autonom-Loop, Session 6: Storage-RPC)
+
+- Current phase: 15 Storage-RPC-Surface FERTIG (4 RPCs, funktional PASS, uncommittet); Phase 11-Kern gepusht b369ac0117
+- Completed: src/rpc/storage.cpp (commit/challenge/prove/verify, Kategorie storage, Raw-Order-Konvention D-023); test/functional/rpc_storage.py PASS (unabhängiges hashlib-Orakel); Spec §12 + PROOFS/storage erweitert
+- Tests: funktional rpc_storage PASS (2x); C++ 882 unverändert (keine Kern-Änderung)
+- Open: Commit+Push Storage-RPC; Phase 14 (Registry/Rewards), 16 (P2P), 12/13 (StatePacks/NFT)
+- Last verified commit: `b369ac0117` (gepusht origin/feat/chain-identity); Arbeitsbranch: feat/chain-identity
+
 # STATE.md — 2026-09-30 (Autonom-Loop, Session 5: Wallet-PQC + Storage-Kern)
 
 - Current phase: 10c Wallet-PQC-Custody FERTIG (gepusht 9e3240c764) + 11 Storage-Proof-KERN implementiert (uncommittet); Freeze §31.2 NACHGEHOLT (Clean-Checkout-Build GRÜN)

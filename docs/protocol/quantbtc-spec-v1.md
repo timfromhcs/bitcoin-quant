@@ -87,6 +87,13 @@ Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDEN
 - Reward-Skizze (§81, Formel erst Phase 14): pro verifizierter Epoche
   `reward = base_rate * verified_bytes` (fixpunkt, deterministisch, Overflow-regeln TBD)
 - Provider-Registrierung/Failure/Exit/Sybil: Policy-Layer Phase 14 (Kern hier: Challenge/Proof/Verify)
+- RPC-Surface (Kategorie `storage`, implementiert + funktional getestet):
+  `storagecommit` (Content→Root/Hashes), `storagechallenge` (Epoche→Indizes),
+  `storageprove` (Content+Index→Chunk/Pfad/Envelope), `storageverify`
+  (Root+Envelope→{valid,reason}, fail-closed, wirft nie für Proof-Inhalt)
+- Konvention: Storage-Hashes sind RAW-Byte-Order-Hex (NICHT display-reversed
+  wie txid/blockhash) — begründet: Byte-Strings, kein Chain-Hash; in Help dokumentiert
+- Bounds: Content ≤1 MiB, Samples 1..1024, Pfad ≤64 (DoS-Schranken)
 
 ## 13. Storage-Economy (§87–§88)
 - Formel + Rundung + Overflow + Maxima + Transitionstests; Geldpolitik (Supply/Reward/Halving/Fees/Burn) vor Mainnet einfrieren
