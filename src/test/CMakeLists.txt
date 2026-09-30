@@ -74,6 +74,7 @@ add_executable(test_bitcoin
   net_peer_eviction_tests.cpp
   net_tests.cpp
   netbase_tests.cpp
+  nft_tests.cpp
   node_init_tests.cpp
   node_warnings_tests.cpp
   orphanage_tests.cpp
@@ -176,6 +177,7 @@ target_link_libraries(test_bitcoin
   bitcoin_consensus
   pqc
   storage
+  nft
   minisketch
   secp256k1
   Boost::headers

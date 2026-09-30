@@ -69,8 +69,18 @@ Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDEN
 - Format `.qsp` v1: HEADER/MANIFEST/INDEX/CHUNKS/FOOTER; logisch→deterministisch→chunked→komprimiert→Manifest+Hashes
 - Verlustfrei: `state_root_before == state_root_after` + Record-Counts; Fallback auf Normalsync
 
-## 11. NFT (§70–§77, §86)
-- Trennung Ownership/Metadaten/Content-Commitment/Storage-Vertrag vs. Content-Bytes; Kern-Record (asset_id … status); Lifecycle MINTED→…→BURNED; bounded Budgets/Renewals; Grace statt Sofort-Löschung; ehrliche Lösch-Sprache (expired/unpinned/…)
+## 11. NFT (§70–§77, §86) — MINT-RECORD KERN DRAFT v1 (kein Konsens-Hook)
+- Trennung Ownership/Metadaten/Content-Commitment/Storage-Vertrag vs. Content-Bytes (bleibt Prinzip)
+- MintRecord v1: `ver(1) || collection_id(32) || serial(8 BE) || content_root(32)
+  || metadata_hash(32) || scriptlen(2 LE) || owner_script || minted_epoch(8 LE)`
+- nft_id (deterministisch, rein): `SHA256d(collection_id || BE64(serial))` —
+  Eindeutigkeit = Registry-Layer (Record trägt nur die Felder), nicht die Formel
+- Validierung (strukturell): nur ver=1; owner_script nicht-leer, ≤10000 B (volle
+  Script-Gültigkeit erst bei Transfer-Aktivierung); alle 32B-Felder exakt
+- Lifecycle MINTED→…→BURNED, Renewals/Grace/Lösch-Sprache: Folgephase (Status-Maschine
+  erst mit Registry + Konsens-Hook sinnvoll — kein toter Code vorab)
+- Ehrliche Gaps (NICHT hier): Transfer-Kette, Registry-Eindeutigkeit/Persistenz,
+  Collection-Definitionen, Royalty/Marktplatz-Logik, Konsens-Hook
 
 ## 12. Storage (§78–§85) — PROOF-KERN DRAFT v1 (PDP-lite, ehrlich begrenzt)
 - Content: 65536-Byte-Chunks (letzter kürzer); Leaf(i) = SHA256d(chunk);

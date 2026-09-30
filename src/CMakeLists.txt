@@ -35,6 +35,7 @@ else()
 endif()
 add_subdirectory(pqc)
 add_subdirectory(storage)
+add_subdirectory(nft)
 
 # Set top-level target output locations.
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)

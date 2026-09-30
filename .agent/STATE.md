@@ -1,3 +1,11 @@
+# STATE.md — 2026-09-30 (Autonom-Loop, Session 8: E:-Ausfall + Umzug nach C: + NFT)
+
+- Current phase: B-004 (E:-Laufwerk ausgefallen) BEWÄLTIGT via Salvage + Re-Klon nach C:\btc-quant\bitcoin-quant; NFT-Mint-KERN re-eingepflegt (C++ UNGETESTET, ehrlich markiert); README-Rewrite ausstehend
+- Completed: 6/7 NFT-Dateien byte-exakt gerettet (gen-Skript rekonstruiert + via Re-Generierung als identisch BEWIESEN); Klon ed0652cdc4 sauber; Wiring byte-identisch; Vektoren im Klon regeneriert (identisch); Python-Ref PASS
+- Tests: Python nft-ref PASS (2x); C++ nft_tests = NOT RUN (kein Build möglich — B-004); Suite weiter 887 (unverändert, kein C++-Code im Push aktiviert? — nft IST verdrahtet: Build ausstehend)
+- Open: C:-Voll-Build + nft_tests nachholen; README-Rewrite + Push; dann Phase 16/12/Registry-Folgen
+- Last verified commit: `ed0652cdc4` (GitHub-Stand, verifiziert via Klon); Arbeitskopie: C:\btc-quant\bitcoin-quant feat/chain-identity
+
 # STATE.md — 2026-09-30 (Autonom-Loop, Session 7: Storage-Economy-Kern)
 
 - Current phase: 14 Economy-KERN FERTIG (Record/Rewards/Status, uncommittet); 15 Storage-RPC gepusht 1f82bafbf2

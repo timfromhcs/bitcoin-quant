@@ -121,3 +121,6 @@
 ## D-024 — Storage-Economy: exakte portable Fixpunkt-Math, strukturelle Records
 - Gewählt: (a) amount=floor(verified*price/2^30) mit 128-Bit-Limb-Math (kein __int128/MSVC, kein Float je); (b) OVERFLOW-Enum umbenannt (REWARD_* — Kollision mit Makro im TU); (c) payout_script nur strukturell (Größe), volle Script-Prüfung erst bei Payout-Aktivierung (DAG-Regel: storage linkt kein consensus); (d) Single-Epoch-Accounting (verified<=capacity), Multi-Epoch per Summe; (e) MAX_MONEY Single-Source via consensus/amount.h (header-only)
 - Gaps: Operator-Bindung, Registry-Eindeutigkeit/Persistenz, Audit-Aggregation, Konsens-Hook, Payouts (Folgephasen)
+
+## D-025 — B-004: ungetestetes NFT committen (ehrlich) + CamelCase-Konvention
+- Gewählt: (a) NFT-Mint-Kern wird committet/pusht OBWOHL C++ ungetestet ist — Commit-Message + PROOFS/nft sagen explizit NOT RUN (B-004), kein Grün-Vortäuschen; (b) neue Enums CamelCase (MintError::Ok...) nach OVERFLOW-Makro-Lehre; (c) Arbeitskopie nach C:\btc-quant\bitcoin-quant (keine Leerzeichen im Pfad mehr); (d) Salvage-Nachweis: Re-Generierung byte-identisch statt Behauptung

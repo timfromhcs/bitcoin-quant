@@ -25,3 +25,9 @@
 - Blockiert: Â§20-Vergleich (als NOT VERIFIED ONLINE markiert, kein Release-Gate)
 
 Update 2026-09-30: Re-Trigger nach Push 7293662e69 (60s gewartet) â€” weiterhin total_count=0. B-003 bleibt BLOCKED-external.
+
+## B-004 — E:-Laufwerk ausgefallen (Device-Level, ERROR_DEV_NOT_EXIST)
+- Symptom 2026-09-30 ~15:00: erst MSBuild-Schreibfehler (MSB4018/MSB3491 .tlog), dann E: komplett schreibgeschützt, dann Volume aus Get-Volume verschwunden, Verzeichnisse (src/test, test/functional) unreadable
+- Bewältigung: 6/7 Dateien byte-exakt nach C:\ft\salvage gerettet (Lesen ging noch), gen-Skript rekonstruiert + Re-Generierung als byte-identisch BEWIESEN, Re-Klon nach C:\btc-quant\bitcoin-quant (ed0652cdc4, clean), NFT re-eingepflegt (Wiring byte-identisch verifiziert)
+- Verlust: KEIN Commit-Verlust (alles bis ed0652cdc4 auf GitHub); E:\btc quant\quantbtc-backup\ (Evidenz-Logs) evtl. unerreichbar bis Laufwerk zurück
+- Offen: Hardware prüfen (USB/extern?); E: nur lesend anfassen bis geklärt; C:-Voll-Build + nft_tests nachholen
