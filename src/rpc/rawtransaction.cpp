@@ -8,12 +8,14 @@
 #include <addresstype.h>
 #include <base58.h>
 #include <chain.h>
+#include <chainparams.h>
 #include <coins.h>
 #include <common/types.h>
 #include <consensus/amount.h>
 #include <core_io.h>
 #include <crypto/common.h>
 #include <crypto/hex_base.h>
+#include <crypto/sha256.h>
 #include <hash.h>
 #include <index/txindex.h>
 #include <kernel/chainparams.h>
@@ -25,6 +27,8 @@
 #include <node/psbt.h>
 #include <node/transaction.h>
 #include <policy/feerate.h>
+#include <pqc/backend.h>
+#include <pqc/encoding.h>
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <psbt.h>
@@ -39,6 +43,7 @@
 #include <script/interpreter.h>
 #include <script/keyorigin.h>
 #include <script/script.h>
+#include <script/descriptor.h>
 #include <script/sign.h>
 #include <script/signingprovider.h>
 #include <script/solver.h>
@@ -2166,6 +2171,216 @@ RPCMethod descriptorprocesspsbt()
     };
 }
 
+static RPCMethod createpqcaddress()
+{
+    return RPCMethod{
+        "createpqcaddress",
+        "Generate a new post-quantum key pair and return its P2PQ address.\n"
+                "WARNING: the private key material is returned in the response (inside\n"
+                "the custody descriptor). Back it up securely; anyone holding it can\n"
+                "spend. This RPC never stores keys.\n",
+                {
+                    {"algorithm", RPCArg::Type::STR, RPCArg::Default{"ml-dsa-65"}, "PQC algorithm (only \"ml-dsa-65\" supported)"},
+                },
+                RPCResult{
+                    RPCResult::Type::OBJ, "", "",
+                    {
+                        {RPCResult::Type::STR, "address", "P2PQ bech32m address for the active chain"},
+                        {RPCResult::Type::STR_HEX, "pubkey", "Raw public key bytes"},
+                        {RPCResult::Type::STR, "descriptor", "p2pq() custody descriptor (checksummed, holds private key)"},
+                        {RPCResult::Type::STR, "algorithm", "Algorithm used"},
+                    }
+                },
+                RPCExamples{
+                    HelpExampleCli("createpqcaddress", "")
+            + HelpExampleRpc("createpqcaddress", "")
+                },
+        [](const RPCMethod& self, const JSONRPCRequest& request) -> UniValue
+{
+    pqc::RegisterDefaultPQCBackends();
+    const std::string algo_str{request.params[0].isNull() ? "ml-dsa-65" : request.params[0].get_str()};
+    pqc::PQCAlgorithm algo{pqc::PQCAlgorithm::UNKNOWN};
+    if (algo_str == "ml-dsa-65") {
+        algo = pqc::PQCAlgorithm::ML_DSA_65;
+    } else {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Unsupported PQC algorithm (only \"ml-dsa-65\" supported)");
+    }
+    auto backend{pqc::GetPQCBackend("liboqs")};
+    if (!backend || !backend->Supports(algo)) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "PQC production backend unavailable");
+    }
+    auto kp{backend->Generate(algo)};
+    if (!kp) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "PQC key generation failed");
+    }
+    // Address: witness v1 program carrying ver||alg||keyid (bech32m).
+    uint256 keyid;
+    CSHA256().Write(kp->pubkey.data(), kp->pubkey.size()).Finalize(keyid.begin());
+    std::vector<unsigned char> program;
+    program.reserve(35);
+    program.push_back(pqc::PQC_ENVELOPE_VERSION);
+    const auto id{static_cast<uint16_t>(algo)};
+    program.push_back(id & 0xff);
+    program.push_back((id >> 8) & 0xff);
+    program.insert(program.end(), keyid.begin(), keyid.end());
+    const std::string address{EncodeDestination(WitnessUnknown(1, program))};
+    // Custody descriptor (checksummed private form).
+    FlatSigningProvider provider;
+    std::string error;
+    auto parsed{Parse("p2pq(" + HexStr(kp->pubkey) + "," +
+                      HexStr(std::vector<unsigned char>(kp->privkey.begin(), kp->privkey.end())) + ")",
+                      provider, error)};
+    if (parsed.empty()) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Could not build custody descriptor: %s", error));
+    }
+    std::string desc_private;
+    if (!parsed[0]->ToPrivateString(provider, desc_private)) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Could not serialize custody descriptor");
+    }
+    UniValue result(UniValue::VOBJ);
+    result.pushKV("address", address);
+    result.pushKV("pubkey", HexStr(kp->pubkey));
+    result.pushKV("descriptor", desc_private);
+    result.pushKV("algorithm", algo_str);
+    return result;
+},
+    };
+}
+
+static RPCMethod signpqcwithkey(){
+    return RPCMethod{
+        "signpqcwithkey",
+        "Sign P2PQ (post-quantum) inputs of a raw transaction (serialized, hex-encoded).\n"
+                "The second argument is an array of p2pq() descriptor strings (private custody\n"
+                "form) holding the only keys used for signing.\n"
+                "The third argument is an array of previous transaction outputs; scriptPubKey\n"
+                "and amount are REQUIRED for every P2PQ input (fail-closed otherwise).\n"
+                "Only P2PQ inputs are signed; any other input yields a per-input error.\n",
+                {
+                    {"hexstring", RPCArg::Type::STR, RPCArg::Optional::NO, "The transaction hex string"},
+                    {"descriptors", RPCArg::Type::ARR, RPCArg::Optional::NO, "p2pq() descriptor strings with private keys",
+                        {
+                            {"descriptor", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "p2pq(pubkeyhex,privkeyhex) with checksum"},
+                        },
+                        },
+                    {"prevtxs", RPCArg::Type::ARR, RPCArg::Optional::NO, "The previous dependent transaction outputs",
+                        {
+                            {"", RPCArg::Type::OBJ, RPCArg::Optional::OMITTED, "",
+                                {
+                                    {"txid", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "The transaction id"},
+                                    {"vout", RPCArg::Type::NUM, RPCArg::Optional::NO, "The output number"},
+                                    {"scriptPubKey", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "output script (required)"},
+                                    {"amount", RPCArg::Type::AMOUNT, RPCArg::Optional::NO, "output amount (required for P2PQ sighash)"},
+                                },
+                                },
+                        },
+                        },
+                },
+                RPCResult{
+                    RPCResult::Type::OBJ, "", "",
+                    {
+                        {RPCResult::Type::STR_HEX, "hex", "The hex-encoded raw transaction with signature(s)"},
+                        {RPCResult::Type::BOOL, "complete", "If the transaction has a complete set of signatures"},
+                        {RPCResult::Type::ARR, "errors", /*optional=*/true, "Script verification errors (if there are any)",
+                        {
+                            {RPCResult::Type::OBJ, "", "",
+                            {
+                                {RPCResult::Type::STR_HEX, "txid", "The hash of the referenced, previous transaction"},
+                                {RPCResult::Type::NUM, "vout", "The index of the output to spent and used as input"},
+                                {RPCResult::Type::STR, "error", "Verification or signing error related to the input"},
+                            }},
+                        }},
+                    }
+                },
+                RPCExamples{
+                    HelpExampleCli("signpqcwithkey", "\"myhex\" \"[\\\"p2pq(...)\\\"]\" \"[{\\\"txid\\\":\\\"...\\\",\\\"vout\\\":0,\\\"scriptPubKey\\\":\\\"...\\\",\\\"amount\\\":1}]\"")
+            + HelpExampleRpc("signpqcwithkey", "\"myhex\", \"[\\\"p2pq(...)\\\"]\", \"[{\\\"txid\\\":\\\"...\\\",\\\"vout\\\":0,\\\"scriptPubKey\\\":\\\"...\\\",\\\"amount\\\":1}]\"")
+                },
+        [](const RPCMethod& self, const JSONRPCRequest& request) -> UniValue
+{
+    pqc::RegisterDefaultPQCBackends();
+    CMutableTransaction mtx;
+    if (!DecodeHexTx(mtx, request.params[0].get_str())) {
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed. Make sure the tx has at least one input.");
+    }
+
+    // Collect PQC custody keys from the descriptors (private form required).
+    FlatSigningProvider provider;
+    const UniValue& descs = request.params[1].get_array();
+    for (size_t i = 0; i < descs.size(); ++i) {
+        const std::string desc_str{descs[i].get_str()};
+        std::string error;
+        auto parsed{Parse(desc_str, provider, error, /*require_checksum=*/true)};
+        if (parsed.empty()) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("Invalid p2pq descriptor at index %d: %s", i, error));
+        }
+        FlatSigningProvider out;
+        parsed[0]->ExpandPrivate(0, provider, out);
+        provider.Merge(std::move(out));
+    }
+    if (provider.GetPQCPubKeys().empty()) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No PQC private keys provided (need p2pq(pubkey,privkey) custody form)");
+    }
+
+    // Fetch previous outputs (scriptPubKey and amount are mandatory here:
+    // note ParsePrevouts defaults a missing amount to MAX_MONEY, so enforce
+    // presence explicitly — a P2PQ sighash without the true value is malleable).
+    for (const UniValue& entry : request.params[2].get_array().getValues()) {
+        if (!entry.isObject() || !entry.exists("amount")) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "prevtxs entry lacks required \"amount\" (mandatory for P2PQ sighash)");
+        }
+    }
+    std::map<COutPoint, Coin> coins;
+    for (const CTxIn& txin : mtx.vin) {
+        coins[txin.prevout];
+    }
+    FlatSigningProvider dummy_keystore;
+    ParsePrevouts(request.params[2], &dummy_keystore, coins);
+
+    UniValue result(UniValue::VOBJ);
+    UniValue errors(UniValue::VARR);
+    bool complete = true;
+    SignOptions options;
+    for (size_t i = 0; i < mtx.vin.size(); ++i) {
+        const COutPoint& prevout{mtx.vin[i].prevout};
+        const auto it{coins.find(prevout)};
+        auto fail = [&](const std::string& msg) {
+            complete = false;
+            UniValue entry(UniValue::VOBJ);
+            entry.pushKV("txid", prevout.hash.GetHex());
+            entry.pushKV("vout", (int64_t)prevout.n);
+            entry.pushKV("error", msg);
+            errors.push_back(std::move(entry));
+        };
+        if (it == coins.end() || it->second.IsSpent()) {
+            fail("prevout not provided");
+            continue;
+        }
+        const Coin& coin{it->second};
+        if (coin.out.nValue < 0) {
+            fail("prevout amount required for P2PQ sighash");
+            continue;
+        }
+        if (!pqc::ParseP2PQScript(coin.out.scriptPubKey)) {
+            fail("not a P2PQ input (only P2PQ inputs are signed by signpqcwithkey)");
+            continue;
+        }
+        MutableTransactionSignatureCreator creator(mtx, i, coin.out.nValue, options);
+        SignatureData sigdata;
+        if (!ProduceSignature(provider, creator, coin.out.scriptPubKey, sigdata) || !sigdata.complete) {
+            fail("P2PQ signing failed (missing key or invalid parameters)");
+            continue;
+        }
+        mtx.vin[i].scriptWitness = sigdata.scriptWitness;
+    }
+    result.pushKV("hex", EncodeHexTx(CTransaction(mtx)));
+    result.pushKV("complete", complete);
+    if (!errors.empty()) result.pushKV("errors", errors);
+    return result;
+},
+    };
+}
+
 void RegisterRawTransactionRPCCommands(CRPCTable& t)
 {
     static const CRPCCommand commands[]{
@@ -2175,6 +2390,8 @@ void RegisterRawTransactionRPCCommands(CRPCTable& t)
         {"rawtransactions", &decodescript},
         {"rawtransactions", &combinerawtransaction},
         {"rawtransactions", &signrawtransactionwithkey},
+        {"rawtransactions", &createpqcaddress},
+        {"rawtransactions", &signpqcwithkey},
         {"rawtransactions", &decodepsbt},
         {"rawtransactions", &combinepsbt},
         {"rawtransactions", &finalizepsbt},

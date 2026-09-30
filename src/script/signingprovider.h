@@ -9,6 +9,7 @@
 #include <addresstype.h>
 #include <attributes.h>
 #include <key.h>
+#include <pqc/key.h>
 #include <pubkey.h>
 #include <script/keyorigin.h>
 #include <script/script.h>
@@ -173,7 +174,23 @@ public:
     virtual bool GetPubKey(const CKeyID &address, CPubKey& pubkey) const { return false; }
     virtual bool GetKey(const CKeyID &address, CKey& key) const { return false; }
     virtual bool HaveKey(const CKeyID &address) const { return false; }
-    virtual bool GetKeyOrigin(const CKeyID& keyid, KeyOriginInfo& info) const { return false; }
+    virtual bool GetKeyOrigin(const CKeyID& keyid, KeyOriginInfo& info) const
+    {
+        return false;
+    }
+
+    /** Retrieve a QuantBTC PQC key pair by raw public key (for p2pq spends).
+     * Default: none. FlatSigningProvider overrides with its pqc_keys map. */
+    virtual bool GetPQCKey(const std::vector<unsigned char>& pubkey, pqc::PQCKeyPair& key) const
+    {
+        return false;
+    }
+
+    /** List all PQC public keys (for keyid matching during signing). */
+    virtual std::vector<std::vector<unsigned char>> GetPQCPubKeys() const
+    {
+        return {};
+    }
     virtual bool GetTaprootSpendData(const XOnlyPubKey& output_key, TaprootSpendData& spenddata) const { return false; }
     virtual bool GetTaprootBuilder(const XOnlyPubKey& output_key, TaprootBuilder& builder) const { return false; }
     virtual std::vector<CPubKey> GetMuSig2ParticipantPubkeys(const CPubKey& pubkey) const { return {}; }
@@ -240,6 +257,9 @@ struct FlatSigningProvider final : public SigningProvider
     std::map<XOnlyPubKey, TaprootBuilder> tr_trees; /** Map from output key to Taproot tree (which can then make the TaprootSpendData */
     std::map<CPubKey, std::vector<CPubKey>> aggregate_pubkeys; /** MuSig2 aggregate pubkeys */
     std::map<uint256, MuSig2SecNonce>* musig2_secnonces{nullptr};
+    /** QuantBTC PQC key pairs by raw public key bytes (custody for p2pq()
+     * descriptors; signing consumes these, never ECDSA maps). */
+    std::map<std::vector<unsigned char>, pqc::PQCKeyPair> pqc_keys;
 
     bool GetCScript(const CScriptID& scriptid, CScript& script) const override;
     bool GetPubKey(const CKeyID& keyid, CPubKey& pubkey) const override;
@@ -253,6 +273,21 @@ struct FlatSigningProvider final : public SigningProvider
     void SetMuSig2SecNonce(const uint256& id, MuSig2SecNonce&& nonce) const override;
     std::optional<std::reference_wrapper<MuSig2SecNonce>> GetMuSig2SecNonce(const uint256& session_id) const override;
     void DeleteMuSig2Session(const uint256& session_id) const override;
+
+    bool GetPQCKey(const std::vector<unsigned char>& pubkey, pqc::PQCKeyPair& key) const override
+    {
+        const auto it{pqc_keys.find(pubkey)};
+        if (it == pqc_keys.end()) return false;
+        key = it->second;
+        return true;
+    }
+    std::vector<std::vector<unsigned char>> GetPQCPubKeys() const override
+    {
+        std::vector<std::vector<unsigned char>> out;
+        out.reserve(pqc_keys.size());
+        for (const auto& [pub, _] : pqc_keys) out.push_back(pub);
+        return out;
+    }
 
     FlatSigningProvider& Merge(FlatSigningProvider&& b) LIFETIMEBOUND;
 };

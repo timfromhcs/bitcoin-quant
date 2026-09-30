@@ -155,6 +155,7 @@ FlatSigningProvider& FlatSigningProvider::Merge(FlatSigningProvider&& b)
     origins.merge(b.origins);
     tr_trees.merge(b.tr_trees);
     aggregate_pubkeys.merge(b.aggregate_pubkeys);
+    pqc_keys.merge(b.pqc_keys);
     // We shouldn't be merging 2 different sessions, just overwrite with b's sessions.
     if (!musig2_secnonces) musig2_secnonces = b.musig2_secnonces;
     return *this;

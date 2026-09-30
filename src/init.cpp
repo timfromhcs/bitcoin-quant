@@ -64,6 +64,7 @@
 #include <node/mempool_persist_args.h>
 #include <node/mining_args.h>
 #include <node/peerman_args.h>
+#include <pqc/backend.h>
 #include <policy/feerate.h>
 #include <policy/fees/block_policy_estimator.h>
 #include <policy/fees/estimator_args.h>
@@ -1586,6 +1587,9 @@ bool AppInitMain(NodeContext& node, interfaces::BlockAndHeaderTipInfo* tip_info)
     for (const auto& client : node.chain_clients) {
         client->registerRpcs();
     }
+    // QuantBTC PQC backends (test + liboqs if compiled): consensus P2PQ
+    // validation needs a registered production backend from startup.
+    pqc::RegisterDefaultPQCBackends();
 #ifdef ENABLE_ZMQ
     RegisterZMQRPCCommands(tableRPC);
 #endif

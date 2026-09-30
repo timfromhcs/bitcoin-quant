@@ -29,10 +29,19 @@
 
 ## Nachtrag Wallet-Layer (Phase 10b)
 - `p2pq(<hex>)`-Deskriptor (parse/expand/round-trip/Negative, C++-getestet)
-- Funktional `wallet_pqc.py`: echter importdescriptors + Funding + Tracking mit
-  exakten Konsens-Bytes; `solvable=false` bewiesen (kein Custody-Anschein)
+- Funktional `wallet_pqc.py` (Watch-only): echter importdescriptors + Funding +
+  Tracking mit exakten Konsens-Bytes; `solvable=false` bewiesen
 - C++: 876/877 PASS (0 Failures, 26.768.562 Assertions)
-- Offen: PQC-Keystore, SignStep-Hook, RPC-Send, Policy, Mempool-Tests
+
+## Nachtrag Custody + Signing (Phase 10c)
+- `p2pq(pub[,priv])`: ToPrivate/ExpandPrivate/HavePrivateKeys; ToString leckt nie
+- CreatePQCSig-Virtual (Mutable echt, Dummy größenkorrekt); SignStep/ProduceSignature-Äste
+- `createpqcaddress` + `signpqcwithkey` RPCs; Node-Startup-Backend-Registrierung
+- Mempool-Policy akzeptiert wohlgeformte P2PQ-Inputs (bounded)
+- E2E: fund → sign → send → mine → confirm auf Regtest + 2 Negative
+- C++: 877/878 PASS (0 Failures, 26.815.615 Assertions)
+- Offen: Wallet-DB-Keystore (importprivkey-Analog mit Verschlüsselung/Backup),
+  PSBT-Felder, GUI, Policy-Tuning
 
 ## Nachtrag Skript-Layer (Phase 10a)
 - `CheckPQCSignature`-Virtual + `VerifyWitnessProgram`-Ast (v1/35B):

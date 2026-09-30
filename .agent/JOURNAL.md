@@ -90,3 +90,15 @@
 - Evidenz: C++ 876/877 (0 Failures, 26.768.562 Assertions), funktional
   wallet_pqc (echter Import + Funding + Tracking, solvable=false); D-020
 - Nächste Phasen: PQC-Keystore + SignStep-Hook + RPC-Send, Policy, Rest
+
+## Session 9 — PQC-Custody + Signing (Phase 10c)
+- FlatSigningProvider.pqc_keys + GetPQCKey/GetPQCPubKeys-Virtuals + Merge
+- `p2pq(pub[,priv])`: ToPrivate/ExpandPrivate/HavePrivateKeys (ToString leckt nie)
+- CreatePQCSig-Virtual (Mutable BIP143 echt, Dummy größenkorrekt);
+  SignStep/ProduceSignature-Äste; Node-Startup-Registrierung (kritisch!)
+- `createpqcaddress` + `signpqcwithkey` RPCs; Mempool-Policy für P2PQ-Inputs
+- Heilung: ParsePrevouts-MAX_MONEY-Falle (expliziter Amount-Pre-Check),
+  spendable-Deprecated, Watch-only-Wallet-Regel, sign/verify-Flow (PSBT-frei via ProduceSignature)
+- Evidenz: C++ 877/878 (0 Failures, 26.815.615 Assertions), funktional
+  Full-Lifecycle (fund→sign→send→mine→confirm) + 2 Negative; D-021
+- Nächste Phasen: Wallet-DB-Keystore, PSBT, GUI, Policy-Tuning, Rest

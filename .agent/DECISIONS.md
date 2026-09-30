@@ -103,3 +103,9 @@
 - Problem: Wallet braucht P2PQ-Empfang/Tracking ohne ECDSA-Keystore-Umbau in einem Schritt
 - Gewählt: `p2pq(<hex>)` als pubkey-tragender Deskriptor (Längen-Dispatch 1952/32, keine Ranges, TOP-only, IsSolvable=false wie addr(), OutputType BECH32M); FlatSigningProvider-PQC-Maps + SignStep-Hook + RPC-Send bewusst NÄCHSTE Phase (kein halbfertiges Custody)
 - Tests: C++ parse/expand/round-trip/Negative + funktional wallet_pqc (echter Import + Funding + Tracking, solvable=false bewiesen)
+
+## D-021 — PQC-Custody: Deskriptor-Container + dedizierte RPC (kein PSBT-Umbau)
+- Problem: PQC-Keys (keine HD-Derivation, kein sk→pk) passen nicht in xpub/WIF-Schema; PSBT-Felder für Witness-Blobs fehlen
+- Gewählt: (a) `p2pq(pub[,priv])`-Custody-Form (Längen-validiert, ToString leckt nie Privates, ExpandPrivate füllt pqc_keys); (b) FlatSigningProvider.pqc_keys + GetPQCKey/GetPQCPubKeys-Virtuals; (c) BaseSignatureCreator::CreatePQCSig-Virtual (Mutable echt mit BIP143/Amount, Dummy größenkorrekt für Fee-Schätzung); (d) SignStep/ProduceSignature-P2PQ-Ast; (e) `signpqcwithkey` + `createpqcaddress` RPCs (Offline-Signer-Muster wie signrawtransactionwithkey, fail-closed: Amount Pflicht, nur P2PQ-Inputs)
+- Policy: mempool akzeptiert wohlgeformte P2PQ-Inputs (bounded Verifikation, keine unknown-script-DoS-Fläche); Standardness-Tuning folgt in Ökonomie-Phase
+- Tests: C++ ProduceSignature→VerifyScript-Loop + RPC-e2e fund→sign→send→mine→confirm + 2 Negative (falscher Key, fehlender Amount)

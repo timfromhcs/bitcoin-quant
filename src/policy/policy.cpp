@@ -12,6 +12,7 @@
 #include <consensus/consensus.h>
 #include <consensus/validation.h>
 #include <policy/feerate.h>
+#include <pqc/encoding.h>
 #include <primitives/transaction.h>
 #include <script/interpreter.h>
 #include <script/script.h>
@@ -232,6 +233,9 @@ TxValidationState ValidateInputsStandardness(const CTransaction& tx, const CCoin
             state.Invalid(TxValidationResult::TX_INPUTS_NOT_STANDARD, "bad-txns-nonstandard-inputs", strprintf("input %u script unknown", i));
             return state;
         } else if (whichType == TxoutType::WITNESS_UNKNOWN) {
+            // QuantBTC P2PQ spends are fully specified (bounded verification
+            // cost, consensus-validated); only unknown programs stay non-standard.
+            if (pqc::ParseP2PQScript(prev.scriptPubKey)) continue;
             // WITNESS_UNKNOWN failures are typically also caught with a policy
             // flag in the script interpreter, but it can be helpful to catch
             // this type of NONSTANDARD transaction earlier in transaction

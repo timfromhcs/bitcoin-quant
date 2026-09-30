@@ -12,6 +12,8 @@
 #include <key.h>
 #include <musig.h>
 #include <policy/policy.h>
+#include <pqc/backend.h>
+#include <pqc/encoding.h>
 #include <prevector.h>
 #include <primitives/transaction.h>
 #include <script/keyorigin.h>
@@ -79,6 +81,33 @@ bool MutableTransactionSignatureCreator::CreateSig(const SigningProvider& provid
         return false;
     vchSig.push_back((unsigned char)hashtype);
     return true;
+}
+
+bool MutableTransactionSignatureCreator::CreatePQCSig(const SigningProvider& provider, std::vector<unsigned char>& sig_blob, std::vector<unsigned char>& pubkey_blob, const CScript& scriptPubKey) const
+{
+    // QuantBTC P2PQ spend: BIP143 SIGHASH_ALL binding over the P2PQ
+    // scriptPubKey (same scriptCode convention as consensus verification
+    // in CheckPQCSignature). SIGHASH_ALL is fixed for envelope v1.
+    const auto info{pqc::ParseP2PQScript(scriptPubKey)};
+    if (!info) return false;
+    if (!MoneyRange(amount)) return false;
+    for (const auto& pub : provider.GetPQCPubKeys()) {
+        pqc::PQCKeyPair kp;
+        if (!provider.GetPQCKey(pub, kp) || kp.algo != info->algo) continue;
+        if (pqc::VerifyP2PQCommitment(*info, pub) != pqc::PQCError::OK) continue;
+        const uint256 sighash{SignatureHash(scriptPubKey, m_txto, nIn, SIGHASH_ALL, amount, SigVersion::WITNESS_V0, m_txdata)};
+        auto backend{pqc::GetPQCBackend("liboqs")};
+        if (!backend || !backend->Supports(kp.algo)) continue;
+        auto sig{backend->Sign(kp, {sighash.begin(), sighash.end()})};
+        if (!sig) continue;
+        auto se{pqc::EncodeSigBlob(kp.algo, sig->bytes)};
+        auto ke{pqc::EncodePubKeyBlob(kp.algo, pub)};
+        if (!se || !ke) continue;
+        sig_blob = std::move(*se);
+        pubkey_blob = std::move(*ke);
+        return true;
+    }
+    return false;
 }
 
 std::optional<uint256> MutableTransactionSignatureCreator::ComputeSchnorrSignatureHash(const uint256* leaf_hash, SigVersion sigversion) const
@@ -653,6 +682,24 @@ static bool SignStep(const SigningProvider& provider, const BaseSignatureCreator
     ret.clear();
     std::vector<unsigned char> sig;
 
+    // QuantBTC P2PQ: Solver reports WITNESS_UNKNOWN, so intercept explicitly.
+    // BASE pass pushes the program (mirrors WITNESS_V0_KEYHASH two-pass flow);
+    // the witness pass below produces the full [sig_blob, pubkey_blob].
+    if (auto p2pq{pqc::ParseP2PQScript(scriptPubKey)}; p2pq &&
+        (sigversion == SigVersion::BASE || sigversion == SigVersion::WITNESS_V0)) {
+        if (sigversion == SigVersion::BASE) {
+            ret.emplace_back(scriptPubKey.begin() + 2, scriptPubKey.end());
+            whichTypeRet = TxoutType::WITNESS_UNKNOWN;
+            return true;
+        }
+        std::vector<unsigned char> sig_blob, pubkey_blob;
+        if (!creator.CreatePQCSig(provider, sig_blob, pubkey_blob, scriptPubKey)) return false;
+        ret.emplace_back(std::move(sig_blob));
+        ret.emplace_back(std::move(pubkey_blob));
+        whichTypeRet = TxoutType::WITNESS_UNKNOWN;
+        return true;
+    }
+
     std::vector<valtype> vSolutions;
     whichTypeRet = Solver(scriptPubKey, vSolutions);
 
@@ -805,6 +852,13 @@ bool ProduceSignature(const SigningProvider& provider, const BaseSignatureCreato
         if (solved) {
             sigdata.scriptWitness.stack = std::move(result);
         }
+        result.clear();
+    } else if (solved && whichType == TxoutType::WITNESS_UNKNOWN && pqc::ParseP2PQScript(fromPubKey)) {
+        // QuantBTC P2PQ: re-sign with witness version for the full witness.
+        TxoutType subType{TxoutType::NONSTANDARD};
+        solved = solved && SignStep(provider, creator, fromPubKey, result, subType, SigVersion::WITNESS_V0, sigdata) && subType == TxoutType::WITNESS_UNKNOWN;
+        sigdata.scriptWitness.stack = result;
+        sigdata.witness = true;
         result.clear();
     } else if (solved && whichType == TxoutType::WITNESS_UNKNOWN) {
         sigdata.witness = true;

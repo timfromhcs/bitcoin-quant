@@ -1079,7 +1079,9 @@ public:
     }
 
     // NOLINTNEXTLINE(misc-no-recursion)
-    void ExpandPrivate(int pos, const SigningProvider& provider, FlatSigningProvider& out) const final
+    // Non-final so P2PQDescriptor can export PQC custody keys (PQC keys are
+    // not CPubKey-based and cannot flow through m_pubkey_args).
+    virtual void ExpandPrivate(int pos, const SigningProvider& provider, FlatSigningProvider& out) const
     {
         for (const auto& p : m_pubkey_args) {
             p->GetPrivKey(pos, provider, out);
@@ -1204,42 +1206,63 @@ public:
     }
 };
 
-/** A parsed p2pq(PUBKEY) descriptor: QuantBTC post-quantum pay-to-public-key.
+/** A parsed p2pq(PUBKEY[,PRIVKEY]) descriptor: QuantBTC post-quantum pay-to-public-key.
  *
  * PUBKEY is a raw PQC public key (hex), dispatched by length to its algorithm
  * (ML-DSA-65: 1952 bytes; SLH-DSA-SHA2-128s: 32 bytes, reserved). No ranges:
- * PQC keys have no HD derivation. Watch/receive only in protocol v1 (private
- * custody and signing follow); hence IsSolvable() is false like addr().
+ * PQC keys have no HD derivation. Single form is watch/receive; the two-arg
+ * form additionally carries private custody (length must match the algorithm).
+ * Like addr(), IsSolvable() stays false (conservative parity).
  */
 class P2PQDescriptor final : public DescriptorImpl
 {
     const pqc::PQCAlgorithm m_algo;
     const std::vector<unsigned char> m_pubkey;
+    const std::vector<unsigned char> m_privkey; //!< empty unless custody form
     uint256 KeyID() const
     {
         uint256 keyid;
         CSHA256().Write(m_pubkey.data(), m_pubkey.size()).Finalize(keyid.begin());
         return keyid;
     }
+    std::string PubHex() const { return HexStr(m_pubkey); }
 protected:
+    // Public form never carries private material (custody form only via
+    // ToPrivateString); the subscripts helper appends nothing (no subdescs).
     std::string ToStringExtra() const override { return HexStr(m_pubkey); }
     std::vector<CScript> MakeScripts(const std::vector<CPubKey>&, std::span<const CScript>, FlatSigningProvider&) const override
     {
         return Vector(pqc::BuildP2PQScript(m_algo, KeyID()));
     }
 public:
-    P2PQDescriptor(pqc::PQCAlgorithm algo, std::vector<unsigned char> pubkey)
-        : DescriptorImpl({}, "p2pq"), m_algo(algo), m_pubkey(std::move(pubkey)) {}
+    P2PQDescriptor(pqc::PQCAlgorithm algo, std::vector<unsigned char> pubkey, std::vector<unsigned char> privkey = {})
+        : DescriptorImpl({}, "p2pq"), m_algo(algo), m_pubkey(std::move(pubkey)), m_privkey(std::move(privkey)) {}
     bool IsSolvable() const final { return false; }
+    bool HavePrivateKeys(const SigningProvider&) const override { return !m_privkey.empty(); }
 
     std::optional<OutputType> GetOutputType() const override { return OutputType::BECH32M; }
     bool IsSingleType() const final { return true; }
-    bool ToPrivateString(const SigningProvider& arg, std::string& out) const final { return false; }
+    bool ToPrivateString(const SigningProvider&, std::string& out) const final
+    {
+        if (m_privkey.empty()) return false;
+        out = "p2pq(" + HexStr(m_pubkey) + "," + HexStr(m_privkey) + ")";
+        out = AddChecksum(out);
+        return true;
+    }
+    void ExpandPrivate(int, const SigningProvider&, FlatSigningProvider& out) const final
+    {
+        if (m_privkey.empty()) return;
+        pqc::PQCKeyPair kp;
+        kp.algo = m_algo;
+        kp.pubkey = m_pubkey;
+        kp.privkey.assign(m_privkey.begin(), m_privkey.end());
+        out.pqc_keys.emplace(m_pubkey, std::move(kp));
+    }
 
     std::optional<int64_t> ScriptSize() const override { return 37; }
     std::unique_ptr<DescriptorImpl> Clone() const override
     {
-        return std::make_unique<P2PQDescriptor>(m_algo, m_pubkey);
+        return std::make_unique<P2PQDescriptor>(m_algo, m_pubkey, m_privkey);
     }
 };
 
@@ -2616,24 +2639,46 @@ std::vector<std::unique_ptr<DescriptorImpl>> ParseScript(uint32_t& key_exp_index
         return {};
     }
     if (ctx == ParseScriptContext::TOP && Func("p2pq", expr)) {
-        // QuantBTC post-quantum descriptor: p2pq(<raw-pubkey-hex>), dispatched
-        // by length (ML-DSA-65: 1952 bytes; SLH-DSA-SHA2-128s: 32 bytes).
-        // No ranges (no HD derivation for PQC keys); watch/receive only in v1.
-        const auto key_bytes{TryParseHex<uint8_t>(std::string(expr.begin(), expr.end()))};
+        // QuantBTC post-quantum descriptor: p2pq(PUBKEY[,PRIVKEY]), raw hex.
+        // Length-dispatched (ML-DSA-65: 1952/4032 bytes; SLH-DSA-SHA2-128s:
+        // 32/64 bytes, reserved). No ranges (no HD derivation for PQC keys).
+        auto arg = Expr(expr);
+        const auto key_bytes{TryParseHex<uint8_t>(std::string(arg.begin(), arg.end()))};
         if (!key_bytes) {
             error = "p2pq(): key argument is not valid hex";
             return {};
         }
-        pqc::PQCAlgorithm algo{pqc::PQCAlgorithm::UNKNOWN};
-        if (key_bytes->size() == 1952) {
-            algo = pqc::PQCAlgorithm::ML_DSA_65;
-        } else if (key_bytes->size() == 32) {
-            algo = pqc::PQCAlgorithm::SLH_DSA_SHA2_128S;
-        } else {
-            error = strprintf("p2pq(): key must be a 1952-byte ML-DSA-65 or 32-byte SLH-DSA public key, got %d bytes", key_bytes->size());
+        std::vector<unsigned char> priv_bytes;
+        if (Const(",", expr)) {
+            auto arg2 = Expr(expr);
+            const auto priv_parsed{TryParseHex<uint8_t>(std::string(arg2.begin(), arg2.end()))};
+            if (!priv_parsed) {
+                error = "p2pq(): private key argument is not valid hex";
+                return {};
+            }
+            priv_bytes.assign(priv_parsed->begin(), priv_parsed->end());
+        }
+        if (!expr.empty()) {
+            error = "p2pq(): too many arguments";
             return {};
         }
-        ret.emplace_back(std::make_unique<P2PQDescriptor>(algo, std::vector<unsigned char>(key_bytes->begin(), key_bytes->end())));
+        pqc::PQCAlgorithm algo{pqc::PQCAlgorithm::UNKNOWN};
+        size_t need_priv{0};
+        if (key_bytes->size() == 1952) {
+            algo = pqc::PQCAlgorithm::ML_DSA_65;
+            need_priv = 4032;
+        } else if (key_bytes->size() == 32) {
+            algo = pqc::PQCAlgorithm::SLH_DSA_SHA2_128S;
+            need_priv = 64;
+        } else {
+            error = strprintf("p2pq(): public key must be a 1952-byte ML-DSA-65 or 32-byte SLH-DSA public key, got %d bytes", key_bytes->size());
+            return {};
+        }
+        if (!priv_bytes.empty() && priv_bytes.size() != need_priv) {
+            error = strprintf("p2pq(): private key size %d does not match algorithm (expected %d)", priv_bytes.size(), need_priv);
+            return {};
+        }
+        ret.emplace_back(std::make_unique<P2PQDescriptor>(algo, std::vector<unsigned char>(key_bytes->begin(), key_bytes->end()), std::move(priv_bytes)));
         return ret;
     } else if (Func("p2pq", expr)) {
         error = "Can only have p2pq() at top level";
