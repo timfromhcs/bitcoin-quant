@@ -15,8 +15,10 @@
 
 #include <crypto/sha256.h>
 #include <primitives/transaction.h>
+#include <script/descriptor.h>
 #include <script/interpreter.h>
 #include <script/script.h>
+#include <script/signingprovider.h>
 #include <test/data/mldsa65_kat.json.h>
 #include <test/util/json.h>
 #include <test/util/setup_common.h>
@@ -175,6 +177,71 @@ BOOST_AUTO_TEST_CASE(test_backend_vectors)
     info.keyid = kid;
     BOOST_CHECK(VerifyP2PQCommitment(info, tk.pubkey) == PQCError::OK);
 }
+
+#ifdef HAVE_LIBOQS
+BOOST_AUTO_TEST_CASE(p2pq_descriptor)
+{
+    // p2pq() descriptor: parse/expand/round-trip with a production key.
+    RegisterDefaultPQCBackends();
+    auto be{GetPQCBackend("liboqs")};
+    BOOST_REQUIRE(be);
+    auto kp{be->Generate(PQCAlgorithm::ML_DSA_65)};
+    BOOST_REQUIRE(kp.has_value());
+    const std::string desc_str{"p2pq(" + HexStr(kp->pubkey) + ")"};
+    FlatSigningProvider provider;
+    std::string error;
+    auto descs{Parse(desc_str, provider, error)};
+    BOOST_REQUIRE_MESSAGE(!descs.empty(), error);
+    BOOST_REQUIRE_EQUAL(descs.size(), 1U);
+    const auto& desc{descs[0]};
+    BOOST_CHECK(!desc->IsRange());
+    BOOST_CHECK(!desc->IsSolvable()); // watch/receive only in v1 (addr-like)
+    BOOST_CHECK(desc->IsSingleType());
+    BOOST_CHECK_EQUAL(desc->ScriptSize().value_or(-1), 37);
+    BOOST_CHECK(desc->GetOutputType() == OutputType::BECH32M);
+    BOOST_CHECK_EQUAL(desc->GetKeyCount(), 0U);
+    std::vector<CScript> scripts;
+    FlatSigningProvider out;
+    BOOST_REQUIRE(desc->Expand(0, provider, scripts, out));
+    BOOST_REQUIRE_EQUAL(scripts.size(), 1U);
+    uint256 keyid;
+    CSHA256().Write(kp->pubkey.data(), kp->pubkey.size()).Finalize(keyid.begin());
+    BOOST_CHECK(scripts[0] == BuildP2PQScript(PQCAlgorithm::ML_DSA_65, keyid));
+    // ToString round-trip (checksum included).
+    const std::string reto{desc->ToString()};
+    BOOST_CHECK(reto.starts_with("p2pq("));
+    FlatSigningProvider provider2;
+    std::string error2;
+    auto redescs{Parse(reto, provider2, error2)};
+    BOOST_REQUIRE_MESSAGE(!redescs.empty(), error2);
+    BOOST_CHECK_EQUAL(redescs[0]->ToString(), reto);
+    // Private string unavailable (no custody in this descriptor type).
+    std::string priv;
+    BOOST_CHECK(!desc->ToPrivateString(provider, priv));
+    // Parse negatives.
+    const std::string good_hex{HexStr(kp->pubkey)};
+    for (const std::string bad : {std::string{"p2pq(zz)"}, std::string{"p2pq(0011)"},
+                                  std::string{"p2pq()"},
+                                  "sh(p2pq(" + good_hex + "))",
+                                  "wsh(p2pq(" + good_hex + "))"}) {
+        FlatSigningProvider p3;
+        std::string e3;
+        BOOST_CHECK_MESSAGE(Parse(bad, p3, e3).empty(), bad + " parsed but must not: " + e3);
+    }
+    // TEST_XOR-sized (32B) keys parse as reserved SLH, never ML-DSA.
+    const std::string slh_desc{"p2pq(" + std::string(64, '0') + ")"};
+    FlatSigningProvider p4;
+    std::string e4;
+    auto slh_descs{Parse(slh_desc, p4, e4)};
+    BOOST_REQUIRE_MESSAGE(!slh_descs.empty(), e4);
+    std::vector<CScript> slh_scripts;
+    FlatSigningProvider out4;
+    BOOST_REQUIRE(slh_descs[0]->Expand(0, p4, slh_scripts, out4));
+    auto slh_info{ParseP2PQScript(slh_scripts[0])};
+    BOOST_REQUIRE(slh_info.has_value());
+    BOOST_CHECK(slh_info->algo == PQCAlgorithm::SLH_DSA_SHA2_128S);
+}
+#endif
 
 #ifdef HAVE_LIBOQS
 BOOST_AUTO_TEST_CASE(p2pq_spend_e2e)

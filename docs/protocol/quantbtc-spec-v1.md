@@ -50,6 +50,7 @@ Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDEN
 - PQC_VERSION = 1 (1 Byte). Alle konsens-sichtbaren Blobs sind versionierte Envelopes:
   `pubkey_blob = ver(1) || alg_id(2, LE) || raw_pubkey`
   `sig_blob    = ver(1) || alg(2, LE) || raw_sig`
+- Deskriptor `p2pq(<hex>)` (pubkey-tragend, watch/receive; Längen-Dispatch, keine Ranges, TOP-only)
 - P2PQ scriptPubKey: `OP_1 <0x23 <ver(1) || alg(2 LE) || keyid(32)>>`,
   mit `keyid = SHA256(raw_pubkey)` (32 Bytes, voller Hash, keine Trunkierung)
 - P2PQ-Spend: Witness `[sig_blob, pubkey_blob]`; Validierung: Versionen == Script-Version,

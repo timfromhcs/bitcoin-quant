@@ -95,6 +95,11 @@
 
 ## D-019 — P2PQ-Konsens: always-active, BIP143-SIGHASH_ALL, Kapselungs-Pattern
 - Problem: v1/35B war anyone-can-spend-Fallback; P2PQ-Spends brauchen Durchsetzung + Sighash-Bindung + Amount-Zugang im Interpreter
-- Gewählt: (a) always-active ab Genesis (keine Pre-Historie → kein Transitionsrisiko; dokumentiert inkl. Testnet-Replay-Nuance); (b) BIP143-Sighash mit scriptCode == P2PQ-spk (Präzedenz wie P2WPKH-Rekonstruktion) + SIGHASH_ALL fix v1 (kein Sighash-Byte im Witness-Format); (c) CheckPQCSignature als BaseSignatureChecker-Virtual (fail-closed default, Generic-Override mit tx/nIn/amount, Deferring-Forward); (d) Link-Richtung bitcoin_consensus → pqc (pqc ohne consensus-Dep)
-- Tests: echter VerifyScript-e2e-Spend (liboqs-Signatur über echter Sighash) + Negative (mutiert/falscher Amount/leer/kurz)
+- Gewählt: (a) always-active ab Genesis (keine Pre-Historie → kein Transitionsrisiko; dokumentiert inkl. Testnet-Replay-Nuance); (b) BIP143-Sighash mit scriptCode == P2PQ-spk (Präzedenz wie P2WPKH-Rekonstruktion) + SIGHASH_ALL fix v1 (kein Sighash-Byte im Witness-Format); (c) CheckPQCSignature als BaseSignatureChecker-Virtual (fail-closed default, Generic-Override mit tx/nIn/amount, Deferring-Forward); (d) Link-Richtung bitcoin_consensus → pqc (kein Zyklus)
+- Tests: echter VerifyScript-e2e-Spend (liboqs-Signatur über echter Sighash) + 4 Negative (mutiert/falscher Amount/leer/kurz)
 - Offen: Wallet-Keystore/RPC/GUI, Policy-Limits (Standardness), Mempool-Akzeptanz-Tests auf Regtest mit echten P2PQ-Outputs
+
+## D-020 — p2pq()-Deskriptor: Adress-Layer jetzt, Custody später
+- Problem: Wallet braucht P2PQ-Empfang/Tracking ohne ECDSA-Keystore-Umbau in einem Schritt
+- Gewählt: `p2pq(<hex>)` als pubkey-tragender Deskriptor (Längen-Dispatch 1952/32, keine Ranges, TOP-only, IsSolvable=false wie addr(), OutputType BECH32M); FlatSigningProvider-PQC-Maps + SignStep-Hook + RPC-Send bewusst NÄCHSTE Phase (kein halbfertiges Custody)
+- Tests: C++ parse/expand/round-trip/Negative + funktional wallet_pqc (echter Import + Funding + Tracking, solvable=false bewiesen)

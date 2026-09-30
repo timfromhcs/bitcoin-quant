@@ -161,6 +161,7 @@ target_link_libraries(bitcoin_common
     core_interface
     bitcoin_consensus
     bitcoin_util
+    pqc
     univalue
     secp256k1
     $<TARGET_NAME_IF_EXISTS:USDT::headers>

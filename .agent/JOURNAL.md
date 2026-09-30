@@ -79,3 +79,14 @@
 - Evidenz: C++ 875/876 (0 Failures, 26.663.939 Assertions), funktional 13/13
   inkl. segwit/taproot; D-019
 - Nächste Phasen: Wallet-Keystore/RPC (§53+), Policy, Rest
+
+## Session 8 — Wallet-Adress-Layer (§53-Adressen, p2pq-Deskriptor)
+- `P2PQDescriptor` (Modell AddressDescriptor): parse/expand/ToString/BECH32M/
+  37B/Clone; Längen-Dispatch 1952/32; TEST_XOR-frei; TOP-only
+- FlatSigningProvider-PQC-Maps bewusst NICHT (YAGNI bis Signing-Phase)
+- Heilung: stale Binary (nur test_bitcoin gebaut), Watch-only-Wallet-Regel
+  (Keys-Wallet lehnt schlüssellose Deskriptoren ab), `spendable`-Deprecated-Falle,
+  Descriptor-Checksummen (Framework == Node bewiesen)
+- Evidenz: C++ 876/877 (0 Failures, 26.768.562 Assertions), funktional
+  wallet_pqc (echter Import + Funding + Tracking, solvable=false); D-020
+- Nächste Phasen: PQC-Keystore + SignStep-Hook + RPC-Send, Policy, Rest

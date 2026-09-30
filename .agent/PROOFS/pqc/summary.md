@@ -27,6 +27,13 @@
   für P2PQ steht aus (Konsens-Pfad bewiesen, Relay-Policy folgt)
 - Quantum-Sprache per §2/§38/§236 (SHA256d-Hinweis bleibt bestehen)
 
+## Nachtrag Wallet-Layer (Phase 10b)
+- `p2pq(<hex>)`-Deskriptor (parse/expand/round-trip/Negative, C++-getestet)
+- Funktional `wallet_pqc.py`: echter importdescriptors + Funding + Tracking mit
+  exakten Konsens-Bytes; `solvable=false` bewiesen (kein Custody-Anschein)
+- C++: 876/877 PASS (0 Failures, 26.768.562 Assertions)
+- Offen: PQC-Keystore, SignStep-Hook, RPC-Send, Policy, Mempool-Tests
+
 ## Nachtrag Skript-Layer (Phase 10a)
 - `CheckPQCSignature`-Virtual + `VerifyWitnessProgram`-Ast (v1/35B):
   Witness [sig_blob, pubkey_blob], BIP143-SIGHASH_ALL-Bindung, fail-closed
