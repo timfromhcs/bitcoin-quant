@@ -110,6 +110,7 @@ add_executable(test_bitcoin
   skiplist_tests.cpp
   sock_tests.cpp
   span_tests.cpp
+  storage_econ_tests.cpp
   storage_tests.cpp
   streams_tests.cpp
   sync_tests.cpp

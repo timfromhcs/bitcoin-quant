@@ -7,6 +7,7 @@
 # (the future consensus hook will call inward: consensus -> storage).
 add_library(storage STATIC EXCLUDE_FROM_ALL
   proof.cpp
+  econ.cpp
 )
 target_link_libraries(storage
   PRIVATE

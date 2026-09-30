@@ -95,11 +95,27 @@ Aktuell aktiv (Bitcoin-Upstream, zu ERSETZEN): siehe `.agent/AUDITS/NETWORK_IDEN
   wie txid/blockhash) — begründet: Byte-Strings, kein Chain-Hash; in Help dokumentiert
 - Bounds: Content ≤1 MiB, Samples 1..1024, Pfad ≤64 (DoS-Schranken)
 
-## 13. Storage-Economy (§87–§88)
-- Formel + Rundung + Overflow + Maxima + Transitionstests; Geldpolitik (Supply/Reward/Halving/Fees/Burn) vor Mainnet einfrieren
+## 13. Storage-Economy (§87–§88) — KERN DRAFT v1 (reine Mathematik, kein Konsens-Hook)
+- ProviderRecord v1: `ver(1) || provider_id(32) || scriptlen(2 LE) || payout_script
+  || capacity(8 LE) || price_sat_per_GiB_epoch(8 LE) || status(1) || registered_epoch(8 LE)`
+- Validierung (strukturell): nur ver=1; provider_id beliebig-aber-eindeutig (Eindeutigkeit
+  = Registry-Layer, nicht Record); payout_script nicht-leer, ≤10000 B (volle
+  Script-Gültigkeit erst bei Payout-Aktivierung); capacity > 0; price ≤ 21e14;
+  status ∈ {1=ACTIVE, 2=SUSPENDED, 3=EXITED}
+- Status-Maschine: ACTIVE→{SUSPENDED, EXITED}, SUSPENDED→{ACTIVE, EXITED},
+  EXITED terminal (kein Übergang)
+- Reward (exakt, Fixpunkt, floor): `amount = verified_bytes * price / 2^30`,
+  128-Bit-Zwischenergebnis (portable Limb-Math, kein __int128/MSVC-Problem),
+  Fehlerklassen {OK, OVERFLOW (amount > MAX_MONEY), INVALID_INPUT};
+  verified_bytes ≤ capacity (Single-Epoch-Accounting; Multi-Epoch = Summe pro Epoche)
+- Ehrliche Gaps (NICHT hier): Operator-Bindung (provider_id↔Key), Registry-Eindeutigkeit/
+  -Persistenz, Audit-Aggregation (Challenge-Ergebnisse→verified_bytes), Konsens-Hook,
+  Payout-Transaktionen, volle Script-Validierung — jeweils eigene Folgephasen
+- Rest: Geldpolitik (Supply/Reward/Halving/Fees/Burn) vor Mainnet einfrieren
 
 ## 14. RPC/API (§89–§93)
 - Module `quant/pq/nft/storage/snapshot`, Schemaversionierung, Capability-Discovery, Fehler-Modell (Code + Technik- + User-Message + Action)
+- Implementiert: Kategorie `storage` (commit/challenge/prove/verify, Raw-Order-Konvention D-023), PQC (`createpqcaddress`, `signpqcwithkey`)
 
 ## 15. P2P (§107–§108)
 - Capability-Negotiation (versioniert), Resilienztests (Churn/Seeds/DNS/Slow/Malicious/Partition/Reconnect/Invalid)

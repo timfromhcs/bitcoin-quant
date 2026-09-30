@@ -117,3 +117,7 @@
 
 ## D-023 — Storage-RPC: eigene Kategorie + Raw-Order-Konvention
 - Gewählt: (a) eigene RPC-Kategorie storage mit RegisterStorageRPCCommands (statt rawtransactions-Anhang — eigene Domäne, eigene Bounds); (b) Hashes als RAW-Byte-Order-Hex (bewusste Abweichung von der display-reversed RPC-Norm, begründet + in Help dokumentiert); (c) storageverify fail-closed (valid=false+reason, wirft nie für Proof-Inhalt); (d) Bounds Content 1MiB / Samples 1024 / Pfad 64; (e) test/config.ini nur lokal (CMake-Build, Binary-Overrides via Env), NICHT committen
+
+## D-024 — Storage-Economy: exakte portable Fixpunkt-Math, strukturelle Records
+- Gewählt: (a) amount=floor(verified*price/2^30) mit 128-Bit-Limb-Math (kein __int128/MSVC, kein Float je); (b) OVERFLOW-Enum umbenannt (REWARD_* — Kollision mit Makro im TU); (c) payout_script nur strukturell (Größe), volle Script-Prüfung erst bei Payout-Aktivierung (DAG-Regel: storage linkt kein consensus); (d) Single-Epoch-Accounting (verified<=capacity), Multi-Epoch per Summe; (e) MAX_MONEY Single-Source via consensus/amount.h (header-only)
+- Gaps: Operator-Bindung, Registry-Eindeutigkeit/Persistenz, Audit-Aggregation, Konsens-Hook, Payouts (Folgephasen)

@@ -1,3 +1,11 @@
+# STATE.md — 2026-09-30 (Autonom-Loop, Session 7: Storage-Economy-Kern)
+
+- Current phase: 14 Economy-KERN FERTIG (Record/Rewards/Status, uncommittet); 15 Storage-RPC gepusht 1f82bafbf2
+- Completed: src/storage/econ.* (ProviderRecord-Codec, CalcReward 128-Bit-Limb exakt, Status-Maschine); Python-Ref + 25 Differential-Vektoren; storage_econ_tests 5/5; Spec §13 Kern; 3 Bugs behoben (Shift-Maske, OVERFLOW-Makro, Off-by-ones)
+- Tests: C++ 887 (882 + 5 econ, 0 Failures); Python econ-ref PASS
+- Open: Commit+Push; Registry/Persistenz, Audit-Aggregation, Konsens-Hook, Payouts (Folgephasen); 16 (P2P), 12/13 (StatePacks/NFT)
+- Last verified commit: `1f82bafbf2` (gepusht origin/feat/chain-identity); Arbeitsbranch: feat/chain-identity
+
 # STATE.md — 2026-09-30 (Autonom-Loop, Session 6: Storage-RPC)
 
 - Current phase: 15 Storage-RPC-Surface FERTIG (4 RPCs, funktional PASS, uncommittet); Phase 11-Kern gepusht b369ac0117

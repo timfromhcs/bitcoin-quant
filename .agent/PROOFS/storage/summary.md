@@ -29,3 +29,8 @@
 - test/functional/rpc_storage.py PASS auf echter Node (unabhängige hashlib-Re-Implementierung als Orakel)
 - commit/challenge/prove/verify über 5 Content-Größen (1 B..192 KiB) + Epochen 0/7, alle Negative fail-closed, alle Validierungsfehler -8
 - Log: quantbtc-backup/09-tests/rpc-storage-func.log
+
+## Economy-Evidenz (2026-09-30)
+- Differential Python->C++: 21 Reward-Vektoren (2^64-Limb-Stress, Floor-Kanten) + 4 Record-Vektoren byte-identisch
+- storage_econ_tests 5/5, 747 Assertions; mit Proof-Suite 9/9, 858 Assertions (Log: backup 09-tests/storage-econ-tests.log); Gesamtsuite 887
+- Bugs gefunden+behoben: Shift-Maske (>>30-Faltung exakt bewiesen), OVERFLOW-Makro-Kollision, 2x Off-by-one in Negativ-Offsets
